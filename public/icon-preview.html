@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TimesRun Club icon</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@800&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        background: #000;
+        color: #f4efe6;
+        font-family: "IBM Plex Mono", ui-monospace, monospace;
+      }
+      main {
+        min-height: 100svh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 28px;
+        padding: 40px 20px;
+      }
+      .wordmark {
+        font-family: "Inter Tight", sans-serif;
+        font-weight: 800;
+        font-size: 22px;
+        letter-spacing: -0.04em;
+        text-transform: uppercase;
+      }
+      .icon {
+        width: min(72vw, 360px);
+        height: min(72vw, 360px);
+        border-radius: 22.5%;
+        background: #000;
+        object-fit: cover;
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+      }
+      .sizes {
+        display: flex;
+        align-items: flex-end;
+        gap: 18px;
+      }
+      .sizes img {
+        background: #000;
+        border-radius: 22.5%;
+        object-fit: cover;
+      }
+      p {
+        margin: 0;
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        opacity: 0.7;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="wordmark">TimesRun Club</div>
+      <img class="icon" src="/timesrun-icon.png" alt="TimesRun Club app icon" />
+      <div class="sizes">
+        <img src="/timesrun-icon.png" width="60" height="60" alt="" />
+        <img src="/timesrun-icon.png" width="40" height="40" alt="" />
+        <img src="/timesrun-icon.png" width="29" height="29" alt="" />
+      </div>
+      <p>Home screen sizes</p>
+    </main>
+  </body>
+</html>

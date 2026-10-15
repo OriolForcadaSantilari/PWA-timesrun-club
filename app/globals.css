@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0a0a0a;
+  --foreground: #f5f0e8;
+}
+
+html,
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+body {
+  font-family: var(--font-mono), ui-monospace, monospace;
+}
+
+::selection {
+  background: #f5f0e8;
+  color: #111;
+}
+
+.meeting-pin-map .leaflet-container {
+  background: #0a0a0a;
+  font-family: inherit;
+}
+
+.meeting-pin-map .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.95) saturate(0.35);
+}
+
+.meeting-pin-map .leaflet-control-zoom a {
+  background: #111;
+  color: #f4efe6;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.meeting-pin-map .leaflet-control-attribution {
+  background: rgba(0, 0, 0, 0.55);
+  color: rgba(244, 239, 230, 0.7);
+}
+
+.meeting-pin-map .leaflet-control-attribution a {
+  color: #d8b878;
+}
+
+@keyframes grain {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  10% {
+    transform: translate(-1%, -1%);
+  }
+  30% {
+    transform: translate(1%, 0.5%);
+  }
+  50% {
+    transform: translate(-0.5%, 1%);
+  }
+  70% {
+    transform: translate(1.2%, -0.8%);
+  }
+  90% {
+    transform: translate(-0.8%, 0.4%);
+  }
+}
