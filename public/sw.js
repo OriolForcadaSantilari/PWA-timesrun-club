@@ -6,5 +6,6 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(self.clients.claim());
 });
 
-// Empty fetch listener: satisfies older Chromium install checks without caching.
-self.addEventListener("fetch", () => {});
+self.addEventListener("fetch", (event) => {
+  event.respondWith(fetch(event.request));
+});

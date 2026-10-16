@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, Inter_Tight } from "next/font/google";
+import Script from "next/script";
 import { PwaInstall } from "./components/pwa-install";
 import { ConvexClientProvider } from "./ConvexClientProvider";
 import "./globals.css";
@@ -48,6 +49,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${interTight.variable} ${ibmPlexMono.variable} antialiased`}>
+        <Script id="canonical-www" strategy="beforeInteractive">
+          {`if(location.hostname==="timesrun.club"){if(navigator.serviceWorker){navigator.serviceWorker.getRegistrations().then(function(registrations){registrations.forEach(function(registration){registration.unregister()})})}location.replace("https://www.timesrun.club"+location.pathname+location.search+location.hash)}`}
+        </Script>
         <ConvexClientProvider>
           {children}
           <PwaInstall />

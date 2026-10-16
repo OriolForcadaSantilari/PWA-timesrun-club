@@ -11,6 +11,14 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
 export default function YouPage() {
+  return (
+    <RequireSignIn>
+      <YouProfile />
+    </RequireSignIn>
+  );
+}
+
+function YouProfile() {
   const profile = useQuery(api.users.me);
   const saveProfile = useMutation(api.users.updateMe);
   const deleteMe = useMutation(api.users.deleteMe);
@@ -71,7 +79,6 @@ export default function YouPage() {
   }
 
   return (
-    <RequireSignIn>
     <div className="min-h-svh bg-black text-[#f4efe6]">
       <AnnouncementBar />
       <div className="relative h-[36vh] min-h-[220px] overflow-hidden">
@@ -160,6 +167,5 @@ export default function YouPage() {
         </form>
       )}
     </div>
-    </RequireSignIn>
   );
 }
