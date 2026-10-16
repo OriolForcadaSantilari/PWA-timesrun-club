@@ -90,7 +90,7 @@ export default function FindPage() {
             ))}
           </div>
           <Link
-            href="/find/new"
+            href={createHref}
             className="inline-flex h-8 items-center rounded-full border border-white px-4 text-[10px] tracking-[0.18em] uppercase hover:bg-white hover:text-black"
           >
             Create a run

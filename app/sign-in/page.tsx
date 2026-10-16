@@ -23,7 +23,7 @@ function SignInForm() {
   const { isAuthenticated } = useConvexAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const next = searchParams.get("next") || "/find";
+  const next = safeNextPath(searchParams.get("next"));
   const [mode, setMode] = useState<Mode>("signIn");
   const [resetEmail, setResetEmail] = useState("");
   const [error, setError] = useState("");
@@ -58,13 +58,15 @@ function SignInForm() {
       formData.set("flow", mode);
     }
     try {
-      await signIn("password", formData);
+      const result = await signIn("password", formData);
       if (mode === "forgot") {
         setResetEmail(String(formData.get("email") ?? ""));
         setMode("resetCode");
         return;
       }
-      router.replace(next);
+      if (result.signingIn) {
+        window.location.assign(next);
+      }
     } catch (caught) {
       const message = caught instanceof Error ? caught.message : "";
       if (mode === "forgot" && message.includes("InvalidAccountId")) {
@@ -227,18 +229,35 @@ function submitLabel(mode: Mode) {
   return "Sign in";
 }
 
+function safeNextPath(value: string | null) {
+  if (!value || !value.startsWith("/") || value.startsWith("//") || value.includes("://")) {
+    return "/find";
+  }
+  return value;
+}
+
+function rawAuthMessage(caught: unknown) {
+  if (caught instanceof Error) {
+    return caught.message;
+  }
+  return typeof caught === "string" ? caught : "";
+}
+
 function messageFor(mode: Mode, caught: unknown) {
-  const message = caught instanceof Error ? caught.message : "";
+  const message = rawAuthMessage(caught);
   if (mode === "forgot" && (message.includes("Could not send") || message.includes("not configured"))) {
     return "Could not send the reset email yet. Create a new account, or try again later.";
   }
   if (mode === "resetCode" && message.includes("Invalid code")) {
     return "That code is wrong or expired. Request a new one.";
   }
-  if (mode === "signIn" && (message.includes("InvalidSecret") || message.includes("InvalidAccountId"))) {
-    return "Wrong email or password.";
+  if (
+    (mode === "signIn" || mode === "signUp") &&
+    (message.includes("InvalidSecret") || message.includes("InvalidAccountId"))
+  ) {
+    return "Wrong email or password. If this is your first time on the live site, create an account.";
   }
-  return message || "Could not sign in.";
+  return "Sign-in is temporarily unavailable. Try again in a few minutes.";
 }
 
 function SignInShell({ children }: { children: React.ReactNode }) {
