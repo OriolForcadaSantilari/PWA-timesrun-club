@@ -245,6 +245,9 @@ function rawAuthMessage(caught: unknown) {
 
 function messageFor(mode: Mode, caught: unknown) {
   const message = rawAuthMessage(caught);
+  if (message.includes("AuthProviderDiscoveryFailed")) {
+    return "Sign-in is temporarily unavailable. Try again in a few minutes.";
+  }
   if (mode === "forgot" && (message.includes("Could not send") || message.includes("not configured"))) {
     return "Could not send the reset email yet. Create a new account, or try again later.";
   }
@@ -253,7 +256,9 @@ function messageFor(mode: Mode, caught: unknown) {
   }
   if (
     (mode === "signIn" || mode === "signUp") &&
-    (message.includes("InvalidSecret") || message.includes("InvalidAccountId"))
+    (message.includes("InvalidSecret") ||
+      message.includes("InvalidAccountId") ||
+      message.includes("Server Error"))
   ) {
     return "Wrong email or password. If this is your first time on the live site, create an account.";
   }
