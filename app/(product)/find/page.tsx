@@ -5,7 +5,6 @@ import { api } from "@/convex/_generated/api";
 import { canJoinRun, spotsLeft } from "@/lib/matching";
 import { formatPace, formatWhen, whoLabel, type WhoCanJoin } from "@/lib/types";
 import { useQuery } from "convex/react";
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 const WHO_FILTERS: { id: "match" | WhoCanJoin | "all"; label: string }[] = [
@@ -89,12 +88,12 @@ export default function FindPage() {
               </button>
             ))}
           </div>
-          <Link
+          <a
             href={createHref}
             className="inline-flex h-8 items-center rounded-full border border-white px-4 text-[10px] tracking-[0.18em] uppercase hover:bg-white hover:text-black"
           >
             Create a run
-          </Link>
+          </a>
         </div>
 
         <p className="text-[11px] tracking-[0.12em] text-white/55 uppercase">
@@ -113,7 +112,7 @@ export default function FindPage() {
               const left = spotsLeft(run.spots, run.joinedCount);
               return (
                 <li key={run._id}>
-                  <Link href={`/runs/${run._id}`} className="block py-6 transition-opacity hover:opacity-80">
+                  <a href={`/runs/${run._id}`} className="block py-6 transition-opacity hover:opacity-80">
                     <div className="flex items-baseline justify-between gap-4">
                       <p className="text-[11px] tracking-[0.18em] uppercase">{formatWhen(run.startsAt)}</p>
                       <p className="text-[11px] tracking-[0.18em] uppercase">
@@ -135,7 +134,7 @@ export default function FindPage() {
                       </span>
                       <span className="text-[#f4efe6]">{run.viewerJoined ? "Going" : "Join"}</span>
                     </div>
-                  </Link>
+                  </a>
                 </li>
               );
             })}
@@ -143,12 +142,12 @@ export default function FindPage() {
         ) : boardEmpty ? (
           <div className="flex flex-col items-start gap-4 border-t border-white/15 pt-8">
             <p className="text-sm text-white/60">No runs this week. Create the first one.</p>
-            <Link
+            <a
               href={createHref}
               className="inline-flex h-8 items-center rounded-full border border-white px-4 text-[10px] tracking-[0.18em] uppercase hover:bg-white hover:text-black"
             >
               Create a run
-            </Link>
+            </a>
           </div>
         ) : filterEmpty ? (
           <p className="text-sm text-white/60">

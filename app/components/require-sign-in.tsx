@@ -1,42 +1,41 @@
 "use client";
 
 import { useConvexAuth } from "convex/react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
-
-const AUTH_WAIT_MS = 5000;
+import { usePathname } from "next/navigation";
+import { useEffect, type ReactNode } from "react";
+import { AnnouncementBar, SiteHeader } from "./site-header";
 
 export function RequireSignIn({ children }: { children: ReactNode }) {
   const { isAuthenticated, isLoading } = useConvexAuth();
-  const router = useRouter();
-  const [timedOut, setTimedOut] = useState(false);
+  const pathname = usePathname();
+  const signInHref = `/sign-in?next=${encodeURIComponent(pathname)}`;
 
   useEffect(() => {
-    if (!isLoading) {
-      setTimedOut(false);
+    if (isAuthenticated || isLoading) {
       return;
     }
-    const timeoutId = window.setTimeout(() => setTimedOut(true), AUTH_WAIT_MS);
-    return () => window.clearTimeout(timeoutId);
-  }, [isLoading]);
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      return;
-    }
-    if (!isLoading || timedOut) {
-      const next = window.location.pathname + window.location.search;
-      router.replace(`/sign-in?next=${encodeURIComponent(next)}`);
-    }
-  }, [isAuthenticated, isLoading, timedOut, router]);
+    window.location.replace(signInHref);
+  }, [isAuthenticated, isLoading, signInHref]);
 
   if (isAuthenticated) {
     return children;
   }
 
   return (
-    <p className="min-h-svh bg-black px-8 py-20 text-sm text-white/60">
-      {isLoading && !timedOut ? "Loading…" : "Redirecting to sign in…"}
-    </p>
+    <div className="min-h-svh bg-black text-[#f4efe6]">
+      <AnnouncementBar />
+      <SiteHeader />
+      <div className="px-8 py-20">
+        <p className="text-sm text-white/60">
+          {isLoading ? "Checking your session…" : "Redirecting to sign in…"}
+        </p>
+        <a
+          href={signInHref}
+          className="mt-6 inline-flex h-11 items-center text-[11px] tracking-[0.28em] uppercase underline"
+        >
+          Sign in
+        </a>
+      </div>
+    </div>
   );
 }

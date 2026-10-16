@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { AuthButtons } from "./auth-buttons";
 
 const NAV = [
@@ -20,32 +19,32 @@ export function SiteHeader({ overlay = false }: SiteHeaderProps) {
         overlay ? `absolute inset-x-0 top-0 z-20 ${tone}` : `relative bg-black ${tone}`
       }`}
     >
-      <Link
+      <a
         href="/"
         aria-label="TimesRun Club"
         className="font-[family-name:var(--font-display)] leading-[0.88] font-extrabold uppercase drop-shadow-[0_1px_10px_rgba(0,0,0,0.45)]"
       >
         <span className="block text-[22px] tracking-[-0.04em] md:text-[26px]">TimesRun</span>
         <span className="mt-0.5 block text-[10px] tracking-[0.46em] md:text-[11px]">Club</span>
-      </Link>
+      </a>
 
       <nav className="flex items-center gap-3 md:gap-7">
         {NAV.map((item) => (
-          <Link
+          <a
             key={item.href}
             href={item.href}
             className="text-[10px] tracking-[0.16em] uppercase drop-shadow-[0_1px_8px_rgba(0,0,0,0.4)] md:text-[11px] md:tracking-[0.18em]"
           >
             {item.label}
-          </Link>
+          </a>
         ))}
       </nav>
 
       <div className="flex items-center gap-4 drop-shadow-[0_1px_8px_rgba(0,0,0,0.4)]">
         <AuthButtons />
-        <Link href="/you" aria-label="Your profile">
+        <a href="/you" aria-label="Your profile">
           <PersonIcon />
-        </Link>
+        </a>
       </div>
     </header>
   );

@@ -28,6 +28,11 @@ export function PwaInstall() {
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
+      void navigator.serviceWorker.getRegistrations().then((registrations) => {
+        for (const registration of registrations) {
+          void registration.update();
+        }
+      });
       void navigator.serviceWorker.register("/sw.js", { updateViaCache: "none" });
     }
 

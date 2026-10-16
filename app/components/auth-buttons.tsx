@@ -2,12 +2,9 @@
 
 import { useAuthActions } from "@convex-dev/auth/react";
 import { Authenticated, Unauthenticated, AuthLoading } from "convex/react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export function AuthButtons() {
   const { signOut } = useAuthActions();
-  const router = useRouter();
 
   return (
     <>
@@ -15,16 +12,18 @@ export function AuthButtons() {
         <span className="text-[11px] tracking-[0.18em] uppercase opacity-50">…</span>
       </AuthLoading>
       <Unauthenticated>
-        <Link href="/sign-in" className="text-[11px] tracking-[0.18em] uppercase">
+        <a href="/sign-in" className="text-[11px] tracking-[0.18em] uppercase">
           Sign in
-        </Link>
+        </a>
       </Unauthenticated>
       <Authenticated>
         <button
           type="button"
           className="text-[11px] tracking-[0.18em] uppercase"
           onClick={() => {
-            void signOut().then(() => router.refresh());
+            void signOut().then(() => {
+              window.location.assign("/find");
+            });
           }}
         >
           Sign out
