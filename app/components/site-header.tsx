@@ -1,4 +1,5 @@
 import { AuthButtons } from "./auth-buttons";
+import { ProtectedNavLink } from "./protected-nav-link";
 
 const NAV = [
   { href: "/find", label: "FIND" },
@@ -29,22 +30,32 @@ export function SiteHeader({ overlay = false }: SiteHeaderProps) {
       </a>
 
       <nav className="flex items-center gap-3 md:gap-7">
-        {NAV.map((item) => (
-          <a
-            key={item.href}
-            href={item.href}
-            className="text-[10px] tracking-[0.16em] uppercase drop-shadow-[0_1px_8px_rgba(0,0,0,0.4)] md:text-[11px] md:tracking-[0.18em]"
-          >
-            {item.label}
-          </a>
-        ))}
+        {NAV.map((item) =>
+          item.href === "/find/new" ? (
+            <ProtectedNavLink
+              key={item.href}
+              href={item.href}
+              className="text-[10px] tracking-[0.16em] uppercase drop-shadow-[0_1px_8px_rgba(0,0,0,0.4)] md:text-[11px] md:tracking-[0.18em]"
+            >
+              {item.label}
+            </ProtectedNavLink>
+          ) : (
+            <a
+              key={item.href}
+              href={item.href}
+              className="text-[10px] tracking-[0.16em] uppercase drop-shadow-[0_1px_8px_rgba(0,0,0,0.4)] md:text-[11px] md:tracking-[0.18em]"
+            >
+              {item.label}
+            </a>
+          ),
+        )}
       </nav>
 
       <div className="flex items-center gap-4 drop-shadow-[0_1px_8px_rgba(0,0,0,0.4)]">
         <AuthButtons />
-        <a href="/you" aria-label="Your profile">
+        <ProtectedNavLink href="/you" aria-label="Your profile">
           <PersonIcon />
-        </a>
+        </ProtectedNavLink>
       </div>
     </header>
   );
