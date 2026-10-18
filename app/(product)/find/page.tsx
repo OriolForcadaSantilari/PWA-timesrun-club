@@ -26,6 +26,15 @@ export default function FindPage() {
   }, []);
   const runs = useQuery(api.runs.list, { city: "Barcelona", now });
   const [who, setWho] = useState<(typeof WHO_FILTERS)[number]["id"]>("match");
+  const [boardTimedOut, setBoardTimedOut] = useState(false);
+  useEffect(() => {
+    if (runs !== undefined) {
+      setBoardTimedOut(false);
+      return;
+    }
+    const timeoutId = window.setTimeout(() => setBoardTimedOut(true), 5000);
+    return () => window.clearTimeout(timeoutId);
+  }, [runs]);
   const createHref = me
     ? "/find/new"
     : `/sign-in?next=${encodeURIComponent("/find/new")}`;
@@ -105,7 +114,19 @@ export default function FindPage() {
         </p>
 
         {runs === undefined ? (
-          <p className="text-sm text-white/60">Loading the board…</p>
+          boardTimedOut ? (
+            <div className="flex flex-col items-start gap-4">
+              <p className="text-sm text-white/60">The board did not load.</p>
+              <a
+                href="/find"
+                className="inline-flex h-8 items-center rounded-full border border-white px-4 text-[10px] tracking-[0.18em] uppercase hover:bg-white hover:text-black"
+              >
+                Retry
+              </a>
+            </div>
+          ) : (
+            <p className="text-sm text-white/60">Loading the board…</p>
+          )
         ) : visible.length > 0 ? (
           <ul className="divide-y divide-white/15 border-t border-white/15">
             {visible.map((run) => {
