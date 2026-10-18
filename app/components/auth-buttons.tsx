@@ -11,7 +11,7 @@ export function AuthButtons() {
     return (
       <button
         type="button"
-        className="text-[11px] tracking-[0.18em] uppercase underline underline-offset-4"
+        className="text-[11px] tracking-[0.18em] uppercase"
         onClick={() => {
           void signOut().then(() => {
             window.location.assign("/find");
@@ -26,7 +26,7 @@ export function AuthButtons() {
   return (
     <a
       href="/sign-in"
-      className="text-[11px] tracking-[0.18em] uppercase underline underline-offset-4"
+      className="text-[11px] tracking-[0.18em] uppercase"
     >
       Sign in
     </a>
