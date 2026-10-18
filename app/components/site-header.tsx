@@ -8,7 +8,7 @@ const NAV = [
 ] as const;
 
 const navLinkClass =
-  "px-1 py-2 text-[11px] tracking-[0.22em] uppercase drop-shadow-[0_1px_8px_rgba(0,0,0,0.4)] md:py-0 md:text-[11px] md:tracking-[0.18em]";
+  "px-1 py-2 font-[family-name:var(--font-display)] text-[12px] font-bold tracking-[0.22em] uppercase drop-shadow-[0_1px_8px_rgba(0,0,0,0.4)] md:py-0 md:text-[12px] md:tracking-[0.18em]";
 
 type SiteHeaderProps = {
   overlay?: boolean;
@@ -32,7 +32,7 @@ export function SiteHeader({ overlay = false }: SiteHeaderProps) {
         <span className="mt-0.5 block text-[10px] tracking-[0.46em] md:text-[11px]">Club</span>
       </a>
 
-      <nav className="col-span-2 mt-2 flex items-center justify-center gap-8 md:order-none md:col-span-1 md:mt-0 md:flex-1 md:justify-center md:gap-7">
+      <nav className="col-span-2 mt-5 flex items-center justify-center gap-8 md:order-none md:col-span-1 md:mt-0 md:flex-1 md:justify-center md:gap-7">
         {NAV.map((item) =>
           item.href === "/find/new" ? (
             <ProtectedNavLink key={item.href} href={item.href} className={navLinkClass}>
