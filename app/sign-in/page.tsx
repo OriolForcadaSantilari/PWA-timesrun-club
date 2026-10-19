@@ -30,12 +30,23 @@ function SignInForm() {
   const [resetEmail, setResetEmail] = useState("");
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
+  const [welcome, setWelcome] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !welcome) {
       router.replace(next);
     }
-  }, [isAuthenticated, next, router]);
+  }, [isAuthenticated, next, router, welcome]);
+
+  useEffect(() => {
+    if (!welcome) {
+      return;
+    }
+    const timeoutId = window.setTimeout(() => {
+      window.location.assign(next);
+    }, 2000);
+    return () => window.clearTimeout(timeoutId);
+  }, [welcome, next]);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -73,6 +84,10 @@ function SignInForm() {
         return;
       }
       if (result.signingIn) {
+        if (mode === "signUp") {
+          setWelcome(true);
+          return;
+        }
         window.location.assign(next);
       }
     } catch (caught) {
@@ -86,6 +101,22 @@ function SignInForm() {
     } finally {
       setPending(false);
     }
+  }
+
+  if (welcome) {
+    return (
+      <div className="flex min-h-svh flex-col items-center justify-center bg-black px-6 text-center text-[#f4efe6]">
+        <p className="text-[11px] tracking-[0.28em] uppercase text-white/55">TimesRun Club</p>
+        <h1
+          role="status"
+          className="mt-4 max-w-xl font-[family-name:var(--font-display)] text-5xl font-extrabold tracking-[-0.04em] md:text-7xl"
+        >
+          You're in.
+          <br />
+          Find your Pack!
+        </h1>
+      </div>
+    );
   }
 
   return (

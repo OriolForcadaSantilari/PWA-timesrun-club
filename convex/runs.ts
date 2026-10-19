@@ -125,8 +125,11 @@ function assertRunFields(args: {
   if (!args.placeName.trim()) {
     throw new Error("Meeting point is required");
   }
-  if (args.spots < 2 || args.spots > 30) {
-    throw new Error("Spots must be between 2 and 30");
+  if (args.spots < 2) {
+    throw new Error("Spots must be at least 2.");
+  }
+  if (args.spots > 25) {
+    throw new Error("The maximum number of spots is 25.");
   }
   if (args.distanceKm < 1 || args.distanceKm > 50) {
     throw new Error("Distance must be between 1 and 50 km");

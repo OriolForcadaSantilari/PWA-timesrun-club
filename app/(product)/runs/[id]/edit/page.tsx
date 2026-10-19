@@ -40,6 +40,10 @@ export default function EditRunPage() {
       setError("Fill every field. Pace looks like 5:45.");
       return;
     }
+    if (spots > 25) {
+      setError("The maximum number of spots is 25.");
+      return;
+    }
     if (paceMax < paceMin) {
       setError("The slower end of the band must be higher than the faster end.");
       return;
@@ -99,7 +103,7 @@ export default function EditRunPage() {
             <h1 className="mt-2 font-[family-name:var(--font-display)] text-5xl font-extrabold tracking-[-0.04em]">
               Edit run
             </h1>
-            <form className="mt-10 flex flex-col gap-6" onSubmit={(event) => void onSubmit(event)}>
+            <form className="mt-10 flex flex-col gap-6" noValidate onSubmit={(event) => void onSubmit(event)}>
               <Field
                 label="Meeting point"
                 name="placeName"
@@ -122,7 +126,7 @@ export default function EditRunPage() {
               <Field label="When" name="startsAt" type="datetime-local" defaultValue={formatDatetimeLocal(run.startsAt)} />
               <div className="grid grid-cols-2 gap-4">
                 <Field label="Distance km" name="distanceKm" type="number" defaultValue={String(run.distanceKm)} />
-                <Field label="Spots" name="spots" type="number" defaultValue={String(run.spots)} />
+                <Field label="Spots" name="spots" type="number" defaultValue={String(run.spots)} min={2} max={25} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <PaceField label="Pace from" name="paceMin" defaultValue={formatPace(run.paceMin)} />
@@ -165,12 +169,16 @@ function Field({
   type = "text",
   placeholder,
   defaultValue,
+  min,
+  max,
 }: {
   label: string;
   name: string;
   type?: string;
   placeholder?: string;
   defaultValue?: string;
+  min?: number;
+  max?: number;
 }) {
   return (
     <label className="flex flex-col gap-2 text-[11px] tracking-[0.18em] uppercase">
@@ -182,7 +190,14 @@ function Field({
         defaultValue={defaultValue}
         required
         step={type === "number" ? "1" : undefined}
-        min={type === "number" ? "1" : undefined}
+        min={type === "number" ? String(min ?? 1) : undefined}
+        max={max !== undefined ? String(max) : undefined}
+        onInput={(event) => event.currentTarget.setCustomValidity("")}
+        onInvalid={(event) => {
+          if (max !== undefined && event.currentTarget.validity.rangeOverflow) {
+            event.currentTarget.setCustomValidity("The maximum number of spots is 25.");
+          }
+        }}
         className="h-11 border border-white/20 bg-transparent px-3 text-sm tracking-normal normal-case text-[#f4efe6] outline-none placeholder:text-white/30 focus:border-white"
       />
     </label>

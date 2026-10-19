@@ -18,10 +18,33 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://timesrun.club"),
+  metadataBase: new URL("https://www.timesrun.club"),
   title: "TimesRun Club",
   description: "Find people at your pace. Join clubs. Fill open runs.",
   applicationName: "TimesRun Club",
+  openGraph: {
+    title: "TimesRun Club",
+    description: "Find people at your pace. Join clubs. Fill open runs.",
+    url: "https://www.timesrun.club",
+    siteName: "TimesRun Club",
+    type: "website",
+    locale: "en_US",
+    images: [
+      {
+        url: "https://www.timesrun.club/og.jpg?v=1",
+        width: 1200,
+        height: 630,
+        alt: "TimesRun Club",
+        type: "image/jpeg",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "TimesRun Club",
+    description: "Find people at your pace. Join clubs. Fill open runs.",
+    images: ["https://www.timesrun.club/og.jpg?v=1"],
+  },
   appleWebApp: {
     capable: true,
     title: "TimesRun Club",
