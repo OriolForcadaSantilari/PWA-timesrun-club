@@ -27,6 +27,7 @@ const runCardValidator = v.object({
   spots: v.number(),
   whoCanJoin,
   placeName: v.string(),
+  meetupNote: v.optional(v.string()),
   city: v.string(),
   lat: v.number(),
   lng: v.number(),
@@ -89,6 +90,7 @@ async function toRunCard(
     spots: run.spots,
     whoCanJoin: run.whoCanJoin,
     placeName: run.placeName,
+    meetupNote: run.meetupNote,
     city: run.city,
     lat: run.lat,
     lng: run.lng,
@@ -99,12 +101,26 @@ async function toRunCard(
   };
 }
 
+const MEETUP_NOTE_MAX = 140;
+
+function normalizeMeetupNote(note: string | undefined): string | undefined {
+  const trimmed = note?.trim() ?? "";
+  if (!trimmed) {
+    return undefined;
+  }
+  if (trimmed.length > MEETUP_NOTE_MAX) {
+    throw new Error("Meeting details must be 140 characters or less.");
+  }
+  return trimmed;
+}
+
 function assertRunFields(args: {
   placeName: string;
   spots: number;
   distanceKm: number;
   paceMin: number;
   paceMax: number;
+  meetupNote?: string;
 }) {
   if (!args.placeName.trim()) {
     throw new Error("Meeting point is required");
@@ -118,6 +134,7 @@ function assertRunFields(args: {
   if (args.paceMax < args.paceMin) {
     throw new Error("The slower end of the band must be higher than the faster end.");
   }
+  normalizeMeetupNote(args.meetupNote);
 }
 
 export const list = query({
@@ -165,6 +182,7 @@ export const create = authedMutation({
     spots: v.number(),
     whoCanJoin,
     placeName: v.string(),
+    meetupNote: v.optional(v.string()),
     city: v.string(),
     lat: v.number(),
     lng: v.number(),
@@ -174,6 +192,7 @@ export const create = authedMutation({
     assertRunFields(args);
     assertBarcelonaPin(args.city, args.lat, args.lng);
     assertStartsInFuture(args.startsAt, Date.now());
+    const meetupNote = normalizeMeetupNote(args.meetupNote);
 
     const runId = await ctx.db.insert("runs", {
       hostId: ctx.user._id,
@@ -188,6 +207,7 @@ export const create = authedMutation({
       lat: args.lat,
       lng: args.lng,
       createdAt: Date.now(),
+      ...(meetupNote ? { meetupNote } : {}),
     });
 
     await ctx.db.insert("rsvps", {
@@ -276,6 +296,7 @@ export const update = authedMutation({
     spots: v.number(),
     whoCanJoin,
     placeName: v.string(),
+    meetupNote: v.optional(v.string()),
     city: v.string(),
     lat: v.number(),
     lng: v.number(),
@@ -305,6 +326,7 @@ export const update = authedMutation({
       spots: args.spots,
       whoCanJoin: args.whoCanJoin,
       placeName: args.placeName.trim(),
+      meetupNote: normalizeMeetupNote(args.meetupNote),
       city: args.city,
       lat: args.lat,
       lng: args.lng,

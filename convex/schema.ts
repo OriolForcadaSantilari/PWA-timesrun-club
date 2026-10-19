@@ -40,6 +40,7 @@ export default defineSchema({
     spots: v.number(),
     whoCanJoin,
     placeName: v.string(),
+    meetupNote: v.optional(v.string()),
     city: v.string(),
     lat: v.number(),
     lng: v.number(),

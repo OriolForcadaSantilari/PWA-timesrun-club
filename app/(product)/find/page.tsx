@@ -8,8 +8,8 @@ import { useQuery } from "convex/react";
 import { useEffect, useMemo, useState } from "react";
 
 const WHO_FILTERS: { id: "match" | WhoCanJoin | "all"; label: string }[] = [
-  { id: "match", label: "For you" },
   { id: "all", label: "All" },
+  { id: "match", label: "For you" },
   { id: "open", label: "Open to all" },
   { id: "women", label: "Women only" },
   { id: "men", label: "Men only" },
@@ -25,7 +25,7 @@ export default function FindPage() {
     return () => window.clearInterval(timer);
   }, []);
   const runs = useQuery(api.runs.list, { city: "Barcelona", now });
-  const [who, setWho] = useState<(typeof WHO_FILTERS)[number]["id"]>("match");
+  const [who, setWho] = useState<(typeof WHO_FILTERS)[number]["id"]>("all");
   const [boardTimedOut, setBoardTimedOut] = useState(false);
   useEffect(() => {
     if (runs !== undefined) {
@@ -143,6 +143,9 @@ export default function FindPage() {
                     <p className="mt-2 font-[family-name:var(--font-display)] text-2xl font-semibold tracking-[-0.03em]">
                       {run.placeName}
                     </p>
+                    {run.meetupNote ? (
+                      <p className="mt-1 text-sm text-white/60">{run.meetupNote}</p>
+                    ) : null}
                     {run.attendeeNames && run.attendeeNames.length > 0 ? (
                       <p className="mt-2 text-[11px] tracking-[0.12em] text-white/60 normal-case">
                         {run.joinedCount} going · {run.attendeeNames.join(", ")}

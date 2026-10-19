@@ -304,19 +304,74 @@ function Field({
   defaultValue?: string;
   inputMode?: "numeric";
 }) {
+  const [visible, setVisible] = useState(false);
+  const isPassword = type === "password";
+
   return (
     <label className="flex flex-col gap-2 text-[11px] tracking-[0.18em] uppercase">
       {label}
-      <input
-        name={name}
-        type={type}
-        placeholder={placeholder}
-        required
-        autoComplete={autoComplete}
-        defaultValue={defaultValue}
-        inputMode={inputMode}
-        className="h-11 border border-white/20 bg-transparent px-3 text-sm tracking-normal normal-case text-[#f4efe6] outline-none placeholder:text-white/30 focus:border-white"
-      />
+      <div className={isPassword ? "relative" : undefined}>
+        <input
+          name={name}
+          type={isPassword ? (visible ? "text" : "password") : type}
+          placeholder={placeholder}
+          required
+          autoComplete={autoComplete}
+          defaultValue={defaultValue}
+          inputMode={inputMode}
+          className={`h-11 w-full border border-white/20 bg-transparent px-3 text-sm tracking-normal normal-case text-[#f4efe6] outline-none placeholder:text-white/30 focus:border-white ${
+            isPassword ? "pr-11" : ""
+          }`}
+        />
+        {isPassword ? (
+          <button
+            type="button"
+            onClick={() => setVisible((open) => !open)}
+            aria-label={visible ? "Hide password" : "Show password"}
+            aria-pressed={visible}
+            className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-white/70 hover:text-white"
+          >
+            <PasswordEye open={visible} />
+          </button>
+        ) : null}
+      </div>
     </label>
+  );
+}
+
+function PasswordEye({ open }: { open: boolean }) {
+  if (open) {
+    return (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <path
+          d="M3 3 21 21"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+        />
+        <path
+          d="M10.5 6.2A10.8 10.8 0 0 1 12 6c5.2 0 9.2 3.6 10.5 6-.4.8-1.1 1.8-2.1 2.8M6.2 6.2C4.4 7.4 3.1 9 2.5 12c1.3 2.4 5.3 6 10.5 6 1.3 0 2.5-.2 3.6-.6"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+        />
+        <path
+          d="M9.9 9.9A3 3 0 0 0 12 15a3 3 0 0 0 3-3"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+        />
+      </svg>
+    );
+  }
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.6" />
+    </svg>
   );
 }

@@ -27,10 +27,6 @@ export function canJoinRun(
   if (run.whoCanJoin === "men" && profile.gender !== "man") {
     return { ok: false, reason: "This run is men only." };
   }
-  const pace = profile.easyPaceMinPerKm;
-  if (pace < run.paceMin - 0.15 || pace > run.paceMax + 0.15) {
-    return { ok: false, reason: "Your easy pace is outside this band." };
-  }
   return { ok: true };
 }
 

@@ -70,6 +70,7 @@ export default function NewRunPage() {
     const paceMin = parsePace(String(data.get("paceMin") ?? ""));
     const paceMax = parsePace(String(data.get("paceMax") ?? ""));
     const whoCanJoin = String(data.get("whoCanJoin")) as WhoCanJoin;
+    const meetupNote = String(data.get("meetupNote") ?? "").trim();
     const name = placeName.trim();
 
     if (!name || !when || !paceMin || !paceMax || !distanceKm || !spots) {
@@ -101,6 +102,7 @@ export default function NewRunPage() {
         spots,
         whoCanJoin,
         placeName: name,
+        meetupNote: meetupNote || undefined,
         city: "Barcelona",
         lat: coords.lat,
         lng: coords.lng,
@@ -157,6 +159,18 @@ export default function NewRunPage() {
             </div>
             <span className="text-[11px] tracking-normal normal-case text-white/55">
               Type the place, then tap the mark to put it on the map.
+            </span>
+          </label>
+          <label className="flex flex-col gap-2 text-[11px] tracking-[0.18em] uppercase">
+            Meet at
+            <input
+              name="meetupNote"
+              maxLength={140}
+              placeholder="Under the Arc de Triomf"
+              className="h-11 border border-white/20 bg-transparent px-3 text-sm tracking-normal normal-case text-[#f4efe6] outline-none placeholder:text-white/30 focus:border-white"
+            />
+            <span className="text-[11px] tracking-normal normal-case text-white/55">
+              Optional. Exactly where to wait — a fountain, a corner, under the arch.
             </span>
           </label>
           <div className="flex flex-col gap-2">

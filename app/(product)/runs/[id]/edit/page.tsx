@@ -34,6 +34,7 @@ export default function EditRunPage() {
     const paceMin = parsePace(String(data.get("paceMin") ?? ""));
     const paceMax = parsePace(String(data.get("paceMax") ?? ""));
     const whoCanJoin = String(data.get("whoCanJoin")) as WhoCanJoin;
+    const meetupNote = String(data.get("meetupNote") ?? "").trim();
 
     if (!placeName || !when || !paceMin || !paceMax || !distanceKm || !spots) {
       setError("Fill every field. Pace looks like 5:45.");
@@ -71,6 +72,7 @@ export default function EditRunPage() {
         spots,
         whoCanJoin,
         placeName,
+        meetupNote,
         city: "Barcelona",
         lat,
         lng,
@@ -104,6 +106,19 @@ export default function EditRunPage() {
                 placeholder="Parc de la Ciutadella, Arc de Triomf"
                 defaultValue={run.placeName}
               />
+              <label className="flex flex-col gap-2 text-[11px] tracking-[0.18em] uppercase">
+                Meet at
+                <input
+                  name="meetupNote"
+                  maxLength={140}
+                  defaultValue={run.meetupNote ?? ""}
+                  placeholder="Under the Arc de Triomf"
+                  className="h-11 border border-white/20 bg-transparent px-3 text-sm tracking-normal normal-case text-[#f4efe6] outline-none placeholder:text-white/30 focus:border-white"
+                />
+                <span className="text-[11px] tracking-normal normal-case text-white/55">
+                  Optional. Exactly where to wait — a fountain, a corner, under the arch.
+                </span>
+              </label>
               <Field label="When" name="startsAt" type="datetime-local" defaultValue={formatDatetimeLocal(run.startsAt)} />
               <div className="grid grid-cols-2 gap-4">
                 <Field label="Distance km" name="distanceKm" type="number" defaultValue={String(run.distanceKm)} />

@@ -3,7 +3,7 @@
 import { AnnouncementBar, SiteHeader } from "@/app/components/site-header";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { canJoinRun, spotsLeft } from "@/lib/matching";
+import { canJoinRun, paceFitMessage, spotsLeft } from "@/lib/matching";
 import { formatPace, formatPaceBand, formatWhen, mapsSearchUrl, whoLabel } from "@/lib/types";
 import { useMutation, useQuery } from "convex/react";
 import Link from "next/link";
@@ -56,6 +56,8 @@ export default function RunDetailPage() {
   const gate = canJoinRun(listed, listed.joinedCount, listed.viewerJoined, me ?? null);
   const left = spotsLeft(listed.spots, listed.joinedCount);
   const maps = mapsSearchUrl(listed.placeName, listed.city);
+  const paceWarning =
+    me && !listed.viewerIsHost ? paceFitMessage(listed, me.easyPaceMinPerKm) : null;
 
   async function onJoin() {
     setError("");
@@ -150,6 +152,12 @@ export default function RunDetailPage() {
             <dt className="text-white/45">Who</dt>
             <dd className="mt-1 text-sm tracking-normal normal-case">{whoLabel(listed.whoCanJoin)}</dd>
           </div>
+          {listed.meetupNote ? (
+            <div className="col-span-2">
+              <dt className="text-white/45">Meet at</dt>
+              <dd className="mt-1 text-sm tracking-normal normal-case">{listed.meetupNote}</dd>
+            </div>
+          ) : null}
         </dl>
         {listed.whoCanJoin !== "open" ? (
           <p className="-mt-4 text-[11px] tracking-normal normal-case text-white/55">
@@ -161,6 +169,10 @@ export default function RunDetailPage() {
           <p className="border border-[#d8b878]/40 bg-[#d8b878]/10 px-4 py-3 text-sm text-[#d8b878]">
             {notice}
           </p>
+        ) : null}
+
+        {paceWarning ? (
+          <p className="border border-white/20 px-4 py-3 text-sm text-white/80">{paceWarning}</p>
         ) : null}
 
         <p className="text-sm text-white/70">
@@ -240,7 +252,7 @@ export default function RunDetailPage() {
               onClick={() => void onJoin()}
               className="inline-flex h-11 items-center justify-center rounded-full border border-white text-[11px] tracking-[0.28em] uppercase hover:bg-white hover:text-black"
             >
-              Join
+              {paceWarning ? "Join anyway" : "Join"}
             </button>
           </div>
         ) : !me ? (
