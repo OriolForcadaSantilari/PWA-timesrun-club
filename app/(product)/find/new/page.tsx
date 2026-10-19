@@ -105,7 +105,7 @@ export default function NewRunPage() {
         lat: coords.lat,
         lng: coords.lng,
       });
-      router.push(`/runs/${id}`);
+      router.push(`/runs/${id}?created=1`);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Could not create the run.");
       setPending(false);
@@ -125,30 +125,45 @@ export default function NewRunPage() {
         <form className="mt-10 flex flex-col gap-6" onSubmit={onSubmit}>
           <label className="flex flex-col gap-2 text-[11px] tracking-[0.18em] uppercase">
             Meeting point
-            <input
-              name="placeName"
-              value={placeName}
-              onChange={(event) => setPlaceName(event.target.value)}
-              placeholder="Parc de la Ciutadella, Arc de Triomf"
-              required
-              className="h-11 border border-white/20 bg-transparent px-3 text-sm tracking-normal normal-case text-[#f4efe6] outline-none placeholder:text-white/30 focus:border-white"
-            />
-          </label>
-          <div className="flex flex-col gap-2">
-            <MeetingPinMap pin={pin} onPin={(next) => void onMapPin(next)} />
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-[11px] tracking-[0.12em] text-white/55 uppercase">
-                Tap the map to drop the pin
-              </p>
+            <div className="flex items-stretch gap-2">
+              <input
+                name="placeName"
+                value={placeName}
+                onChange={(event) => setPlaceName(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    void findTypedPlace();
+                  }
+                }}
+                placeholder="Parc de la Ciutadella, Arc de Triomf"
+                required
+                className="h-11 min-w-0 flex-1 border border-white/20 bg-transparent px-3 text-sm tracking-normal normal-case text-[#f4efe6] outline-none placeholder:text-white/30 focus:border-white"
+              />
               <button
                 type="button"
                 onClick={() => void findTypedPlace()}
                 disabled={finding}
-                className="text-[11px] tracking-[0.18em] uppercase underline disabled:opacity-50"
+                title="Find this location"
+                aria-label="Find this location"
+                className="inline-flex h-11 w-11 shrink-0 items-center justify-center border border-white/20 hover:border-white disabled:opacity-50"
               >
-                {finding ? "Finding…" : "Find this name"}
+                {finding ? (
+                  <span className="text-[10px] tracking-[0.12em]">…</span>
+                ) : (
+                  <SearchMark />
+                )}
               </button>
             </div>
+            <span className="text-[11px] tracking-normal normal-case text-white/55">
+              Type the place, then tap the mark to put it on the map.
+            </span>
+          </label>
+          <div className="flex flex-col gap-2">
+            <MeetingPinMap pin={pin} onPin={(next) => void onMapPin(next)} />
+            <p className="text-[11px] tracking-[0.12em] text-white/55 uppercase">
+              Tap the map to drop the pin
+            </p>
           </div>
           <Field label="When" name="startsAt" type="datetime-local" />
           <div className="grid grid-cols-2 gap-4">
@@ -186,6 +201,15 @@ export default function NewRunPage() {
       </div>
     </div>
     </RequireSignIn>
+  );
+}
+
+function SearchMark() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="11" cy="11" r="6.2" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M16 16.5 20 20.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
   );
 }
 

@@ -3,7 +3,7 @@
 import { AnnouncementBar, SiteHeader } from "@/app/components/site-header";
 import { api } from "@/convex/_generated/api";
 import { canJoinRun, spotsLeft } from "@/lib/matching";
-import { formatPace, formatWhen, whoLabel, type WhoCanJoin } from "@/lib/types";
+import { formatPace, formatPaceBand, formatWhen, whoLabel, type WhoCanJoin } from "@/lib/types";
 import { useQuery } from "convex/react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -137,7 +137,7 @@ export default function FindPage() {
                     <div className="flex items-baseline justify-between gap-4">
                       <p className="text-[11px] tracking-[0.18em] uppercase">{formatWhen(run.startsAt)}</p>
                       <p className="text-[11px] tracking-[0.18em] uppercase">
-                        {run.distanceKm} km · {formatPace(run.paceMin)}–{formatPace(run.paceMax)}
+                        {run.distanceKm} km · {formatPaceBand(run.paceMin, run.paceMax)}
                       </p>
                     </div>
                     <p className="mt-2 font-[family-name:var(--font-display)] text-2xl font-semibold tracking-[-0.03em]">

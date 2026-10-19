@@ -4,11 +4,11 @@ import { AnnouncementBar, SiteHeader } from "@/app/components/site-header";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { canJoinRun, spotsLeft } from "@/lib/matching";
-import { formatPace, formatWhen, mapsSearchUrl, whoLabel } from "@/lib/types";
+import { formatPace, formatPaceBand, formatWhen, mapsSearchUrl, whoLabel } from "@/lib/types";
 import { useMutation, useQuery } from "convex/react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function RunDetailPage() {
   const params = useParams<{ id: string }>();
@@ -21,6 +21,15 @@ export default function RunDetailPage() {
   const [error, setError] = useState("");
   const [shareNote, setShareNote] = useState("");
   const [hideName, setHideName] = useState(false);
+  const [notice, setNotice] = useState("");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("created") === "1") {
+      setNotice("The run is on the board. See you at the pin.");
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, []);
 
   if (run === undefined) {
     return (
@@ -52,6 +61,7 @@ export default function RunDetailPage() {
     setError("");
     try {
       await joinRun({ runId, hideName });
+      setNotice("You're in. See you at the pin.");
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Could not join.");
     }
@@ -83,7 +93,7 @@ export default function RunDetailPage() {
     setShareNote("");
     const url = window.location.href;
     const title = `${listed.placeName} · TimesRun Club`;
-    const text = `${formatWhen(listed.startsAt)} · ${listed.distanceKm} km · ${formatPace(listed.paceMin)}–${formatPace(listed.paceMax)} /km`;
+    const text = `${formatWhen(listed.startsAt)} · ${listed.distanceKm} km · ${formatPaceBand(listed.paceMin, listed.paceMax)}`;
     try {
       if (typeof navigator.share === "function") {
         await navigator.share({ title, text, url });
@@ -133,7 +143,7 @@ export default function RunDetailPage() {
           <div>
             <dt className="text-white/45">Pace</dt>
             <dd className="mt-1 text-sm tracking-normal normal-case">
-              {formatPace(listed.paceMin)}–{formatPace(listed.paceMax)} /km
+              {formatPace(listed.paceMin)} to {formatPace(listed.paceMax)} /km
             </dd>
           </div>
           <div>
@@ -144,6 +154,12 @@ export default function RunDetailPage() {
         {listed.whoCanJoin !== "open" ? (
           <p className="-mt-4 text-[11px] tracking-normal normal-case text-white/55">
             Based on the gender members choose on their profile. We do not verify it.
+          </p>
+        ) : null}
+
+        {notice ? (
+          <p className="border border-[#d8b878]/40 bg-[#d8b878]/10 px-4 py-3 text-sm text-[#d8b878]">
+            {notice}
           </p>
         ) : null}
 

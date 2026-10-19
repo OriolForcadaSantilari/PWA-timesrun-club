@@ -36,13 +36,18 @@ export function parsePace(value: string): number | null {
   return minutes + seconds / 60;
 }
 
+export function formatPaceBand(minPerKm: number, maxPerKm: number): string {
+  return `Pace ${formatPace(minPerKm)}–${formatPace(maxPerKm)} /km`;
+}
+
 export function formatWhen(timestamp: number): string {
-  return new Intl.DateTimeFormat("en-GB", {
+  return new Intl.DateTimeFormat("en-US", {
     weekday: "short",
     day: "numeric",
     month: "short",
-    hour: "2-digit",
+    hour: "numeric",
     minute: "2-digit",
+    hour12: true,
   }).format(new Date(timestamp));
 }
 

@@ -4,7 +4,8 @@ import { AnnouncementBar, SiteHeader } from "@/app/components/site-header";
 import { SiteFooter } from "@/app/components/site-footer";
 import Link from "next/link";
 import { useAuthActions } from "@convex-dev/auth/react";
-import { useConvexAuth } from "convex/react";
+import { useConvex, useConvexAuth } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState, type FormEvent } from "react";
 
@@ -21,6 +22,7 @@ export default function SignInPage() {
 function SignInForm() {
   const { signIn } = useAuthActions();
   const { isAuthenticated } = useConvexAuth();
+  const convex = useConvex();
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = safeNextPath(searchParams.get("next"));
@@ -44,6 +46,12 @@ function SignInForm() {
       const name = String(formData.get("name") ?? "").trim();
       if (name.length < 2 || name.length > 30) {
         setError("Name must be 2 to 30 characters.");
+        setPending(false);
+        return;
+      }
+      const taken = await convex.query(api.users.isNameTaken, { name });
+      if (taken) {
+        setError("That name is already taken.");
         setPending(false);
         return;
       }
@@ -253,6 +261,9 @@ function messageFor(mode: Mode, caught: unknown) {
   }
   if (mode === "resetCode" && message.includes("Invalid code")) {
     return "That code is wrong or expired. Request a new one.";
+  }
+  if (mode === "signUp" && message.includes("already taken")) {
+    return "That name is already taken.";
   }
   if (
     (mode === "signIn" || mode === "signUp") &&
