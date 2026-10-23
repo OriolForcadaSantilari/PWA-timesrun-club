@@ -1,6 +1,6 @@
 "use client";
 
-import { maskPaceInput } from "@/lib/types";
+import { completePaceInput, maskPaceInput } from "@/lib/types";
 import { useState } from "react";
 
 type PaceFieldProps = {
@@ -29,7 +29,8 @@ export function PaceField({
         placeholder={placeholder}
         required
         onChange={(event) => setValue(maskPaceInput(event.target.value))}
-        className="h-11 border border-white/20 bg-transparent px-3 text-sm tracking-normal normal-case text-[#f4efe6] outline-none placeholder:text-white/30 focus:border-white"
+        onBlur={(event) => setValue(completePaceInput(event.currentTarget.value))}
+        className="h-11 border border-white/20 bg-transparent px-3 text-base tracking-normal normal-case text-[#f4efe6] outline-none placeholder:text-white/30 focus:border-white"
       />
     </label>
   );

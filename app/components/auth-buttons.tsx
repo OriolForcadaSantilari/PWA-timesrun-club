@@ -2,10 +2,12 @@
 
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useConvexAuth } from "convex/react";
+import { useT } from "./i18n-provider";
 
 export function AuthButtons() {
   const { signOut } = useAuthActions();
   const { isAuthenticated } = useConvexAuth();
+  const { t } = useT();
 
   if (isAuthenticated) {
     return (
@@ -18,7 +20,7 @@ export function AuthButtons() {
           });
         }}
       >
-        Sign out
+        {t("signOut")}
       </button>
     );
   }
@@ -28,7 +30,7 @@ export function AuthButtons() {
       href="/sign-in"
       className="text-[11px] tracking-[0.18em] uppercase"
     >
-      Sign in
+      {t("signIn")}
     </a>
   );
 }

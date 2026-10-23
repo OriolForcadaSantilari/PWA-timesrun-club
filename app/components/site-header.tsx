@@ -1,11 +1,8 @@
+"use client";
+
+import { useT } from "./i18n-provider";
 import { AuthButtons } from "./auth-buttons";
 import { ProtectedNavLink } from "./protected-nav-link";
-
-const NAV = [
-  { href: "/find", label: "FIND" },
-  { href: "/find/new", label: "CREATE" },
-  { href: "/clubs", label: "CLUBS" },
-] as const;
 
 const navLinkClass =
   "px-1 py-2 font-[family-name:var(--font-display)] text-[12px] font-bold tracking-[0.22em] uppercase drop-shadow-[0_1px_8px_rgba(0,0,0,0.4)] md:py-0 md:text-[12px] md:tracking-[0.18em]";
@@ -15,7 +12,13 @@ type SiteHeaderProps = {
 };
 
 export function SiteHeader({ overlay = false }: SiteHeaderProps) {
+  const { t } = useT();
   const tone = overlay ? "text-white" : "text-[#f4efe6]";
+  const nav = [
+    { href: "/find", label: t("navFind") },
+    { href: "/find/new", label: t("navCreate") },
+    { href: "/clubs", label: t("navClubs") },
+  ] as const;
 
   return (
     <header
@@ -33,7 +36,7 @@ export function SiteHeader({ overlay = false }: SiteHeaderProps) {
       </a>
 
       <nav className="col-span-2 mt-5 flex items-center justify-center gap-8 md:order-none md:col-span-1 md:mt-0 md:flex-1 md:justify-center md:gap-7">
-        {NAV.map((item) =>
+        {nav.map((item) =>
           item.href === "/find/new" ? (
             <ProtectedNavLink key={item.href} href={item.href} className={navLinkClass}>
               {item.label}
@@ -48,7 +51,7 @@ export function SiteHeader({ overlay = false }: SiteHeaderProps) {
 
       <div className="col-start-2 row-start-1 flex items-center justify-self-end gap-4 drop-shadow-[0_1px_8px_rgba(0,0,0,0.4)]">
         <AuthButtons />
-        <ProtectedNavLink href="/you" aria-label="Your profile">
+        <ProtectedNavLink href="/you" aria-label={t("ariaProfile")}>
           <PersonIcon />
         </ProtectedNavLink>
       </div>
@@ -57,9 +60,10 @@ export function SiteHeader({ overlay = false }: SiteHeaderProps) {
 }
 
 export function AnnouncementBar() {
+  const { t } = useT();
   return (
     <p className="bg-black px-4 py-1.5 text-center text-[10px] font-medium tracking-[0.22em] text-white uppercase">
-      Open runs at your pace. Meet at a public pin.
+      {t("announcement")}
     </p>
   );
 }

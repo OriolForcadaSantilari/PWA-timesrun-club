@@ -1,6 +1,7 @@
 "use client";
 
 import { AnnouncementBar, SiteHeader } from "@/app/components/site-header";
+import { useT } from "@/app/components/i18n-provider";
 import { MeetingPinMap, type MapPin } from "@/app/components/meeting-pin-map";
 import { PaceField } from "@/app/components/pace-field";
 import { RequireSignIn } from "@/app/components/require-sign-in";
@@ -12,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
 export default function NewRunPage() {
+  const { t } = useT();
   const router = useRouter();
   const lookupPlace = useAction(api.geocode.lookup);
   const reversePlace = useAction(api.geocode.reverse);
@@ -24,7 +26,7 @@ export default function NewRunPage() {
 
   async function onMapPin(next: MapPin) {
     if (!isInBarcelona(next.lat, next.lng)) {
-      setError("The meeting pin must be in Barcelona.");
+      setError(t("pinMustBeBarcelona"));
       return;
     }
     setPin(next);
@@ -42,7 +44,7 @@ export default function NewRunPage() {
   async function findTypedPlace() {
     const name = placeName.trim();
     if (!name) {
-      setError("Type a park, plaza, or beach, then find it on the map.");
+      setError(t("typeParkFirst"));
       return;
     }
     setFinding(true);
@@ -50,12 +52,12 @@ export default function NewRunPage() {
     try {
       const found = await lookupPlace({ placeName: name, city: "Barcelona" });
       if (!found || !isInBarcelona(found.lat, found.lng)) {
-        setError("Could not find that meeting point in Barcelona. Tap the map, or try another name.");
+        setError(t("couldNotFindPlace"));
         return;
       }
       setPin(found);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Could not find that place.");
+      setError(caught instanceof Error ? caught.message : t("couldNotFindThatPlace"));
     } finally {
       setFinding(false);
     }
@@ -74,19 +76,19 @@ export default function NewRunPage() {
     const name = placeName.trim();
 
     if (!name || !when || !paceMin || !paceMax || !distanceKm || !spots) {
-      setError("Fill every field. Pace looks like 5:45.");
+      setError(t("fillEveryField"));
       return;
     }
     if (spots > 25) {
-      setError("The maximum number of spots is 25.");
+      setError(t("maxSpots25"));
       return;
     }
     if (paceMax < paceMin) {
-      setError("The slower end of the band must be higher than the faster end.");
+      setError(t("slowerEndHigher"));
       return;
     }
     if (new Date(when).getTime() < Date.now() - 5 * 60 * 1000) {
-      setError("The run must start in the future.");
+      setError(t("mustStartFuture"));
       return;
     }
 
@@ -94,7 +96,7 @@ export default function NewRunPage() {
     try {
       const coords = pin ?? (await lookupPlace({ placeName: name, city: "Barcelona" }));
       if (!coords || !isInBarcelona(coords.lat, coords.lng)) {
-        setError("Drop a pin on the map in Barcelona, or type a park, plaza, or beach in the city.");
+        setError(t("dropPinBarcelona"));
         setPending(false);
         return;
       }
@@ -113,7 +115,7 @@ export default function NewRunPage() {
       });
       router.push(`/runs/${id}?created=1`);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Could not create the run.");
+      setError(caught instanceof Error ? caught.message : t("couldNotCreateRun"));
       setPending(false);
     }
   }
@@ -124,13 +126,13 @@ export default function NewRunPage() {
       <AnnouncementBar />
       <SiteHeader />
       <div className="mx-auto max-w-xl px-5 py-12 md:px-8">
-        <p className="text-[11px] tracking-[0.28em] uppercase">Public pin</p>
+        <p className="text-[11px] tracking-[0.28em] uppercase">{t("publicPin")}</p>
         <h1 className="mt-2 font-[family-name:var(--font-display)] text-5xl font-extrabold tracking-[-0.04em]">
-          Create a run
+          {t("createRunTitle")}
         </h1>
         <form className="mt-10 flex flex-col gap-6" noValidate onSubmit={onSubmit}>
           <label className="flex flex-col gap-2 text-[11px] tracking-[0.18em] uppercase">
-            Meeting point
+            {t("meetingPoint")}
             <div className="flex items-stretch gap-2">
               <input
                 name="placeName"
@@ -144,14 +146,14 @@ export default function NewRunPage() {
                 }}
                 placeholder="Parc de la Ciutadella, Arc de Triomf"
                 required
-                className="h-11 min-w-0 flex-1 border border-white/20 bg-transparent px-3 text-sm tracking-normal normal-case text-[#f4efe6] outline-none placeholder:text-white/30 focus:border-white"
+                className="h-11 min-w-0 flex-1 border border-white/20 bg-transparent px-3 text-base tracking-normal normal-case text-[#f4efe6] outline-none placeholder:text-white/30 focus:border-white"
               />
               <button
                 type="button"
                 onClick={() => void findTypedPlace()}
                 disabled={finding}
-                title="Find this location"
-                aria-label="Find this location"
+                title={t("findThisLocation")}
+                aria-label={t("findThisLocation")}
                 className="inline-flex h-11 w-11 shrink-0 items-center justify-center border border-white/20 hover:border-white disabled:opacity-50"
               >
                 {finding ? (
@@ -162,49 +164,49 @@ export default function NewRunPage() {
               </button>
             </div>
             <span className="text-[11px] tracking-normal normal-case text-white/55">
-              Type the place, then tap the mark to put it on the map.
+              {t("typePlaceThenMark")}
             </span>
           </label>
           <label className="flex flex-col gap-2 text-[11px] tracking-[0.18em] uppercase">
-            Meet at
+            {t("meetAt")}
             <input
               name="meetupNote"
               maxLength={140}
               placeholder="Under the Arc de Triomf"
-              className="h-11 border border-white/20 bg-transparent px-3 text-sm tracking-normal normal-case text-[#f4efe6] outline-none placeholder:text-white/30 focus:border-white"
+              className="h-11 border border-white/20 bg-transparent px-3 text-base tracking-normal normal-case text-[#f4efe6] outline-none placeholder:text-white/30 focus:border-white"
             />
             <span className="text-[11px] tracking-normal normal-case text-white/55">
-              Optional. Exactly where to wait — a fountain, a corner, under the arch.
+              {t("meetAtHint")}
             </span>
           </label>
           <div className="flex flex-col gap-2">
             <MeetingPinMap pin={pin} onPin={(next) => void onMapPin(next)} />
             <p className="text-[11px] tracking-[0.12em] text-white/55 uppercase">
-              Tap the map to drop the pin
+              {t("tapMapToDropPin")}
             </p>
           </div>
-          <Field label="When" name="startsAt" type="datetime-local" />
+          <Field label={t("when")} name="startsAt" type="datetime-local" maxSpotsMessage={t("maxSpots25")} />
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Distance km" name="distanceKm" type="number" placeholder="8" />
-            <Field label="Spots" name="spots" type="number" placeholder="8" min={2} max={25} />
+            <Field label={t("distanceKm")} name="distanceKm" type="number" placeholder="8" maxSpotsMessage={t("maxSpots25")} />
+            <Field label={t("spots")} name="spots" type="number" placeholder="8" min={2} max={25} maxSpotsMessage={t("maxSpots25")} />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <PaceField label="Pace from" name="paceMin" placeholder="5:30" />
-            <PaceField label="Pace to" name="paceMax" placeholder="6:00" />
+            <PaceField label={t("paceFrom")} name="paceMin" placeholder="5:30" />
+            <PaceField label={t("paceTo")} name="paceMax" placeholder="6:00" />
           </div>
           <label className="flex flex-col gap-2 text-[11px] tracking-[0.18em] uppercase">
-            Who can join
+            {t("whoCanJoin")}
             <select
               name="whoCanJoin"
               defaultValue="open"
-              className="h-11 border border-white/20 bg-black px-3 text-sm tracking-normal normal-case text-[#f4efe6]"
+              className="h-11 border border-white/20 bg-black px-3 text-base tracking-normal normal-case text-[#f4efe6]"
             >
-              <option value="open">Open to all</option>
-              <option value="women">Women only</option>
-              <option value="men">Men only</option>
+              <option value="open">{t("whoOpen")}</option>
+              <option value="women">{t("whoWomen")}</option>
+              <option value="men">{t("whoMen")}</option>
             </select>
             <span className="text-[11px] tracking-normal normal-case text-white/55">
-              Based on the gender members choose on their profile. We do not verify it.
+              {t("genderUnverified")}
             </span>
           </label>
           {error ? <p className="text-sm text-red-300">{error}</p> : null}
@@ -213,7 +215,7 @@ export default function NewRunPage() {
             disabled={pending}
             className="mt-2 inline-flex h-11 items-center justify-center rounded-full border border-white text-[11px] tracking-[0.28em] uppercase hover:bg-white hover:text-black disabled:opacity-50"
           >
-            {pending ? "Creating…" : "Create run"}
+            {pending ? t("creating") : t("createRun")}
           </button>
         </form>
       </div>
@@ -238,6 +240,7 @@ function Field({
   placeholder,
   min,
   max,
+  maxSpotsMessage,
 }: {
   label: string;
   name: string;
@@ -245,6 +248,7 @@ function Field({
   placeholder?: string;
   min?: number;
   max?: number;
+  maxSpotsMessage: string;
 }) {
   return (
     <label className="flex flex-col gap-2 text-[11px] tracking-[0.18em] uppercase">
@@ -260,10 +264,10 @@ function Field({
         onInput={(event) => event.currentTarget.setCustomValidity("")}
         onInvalid={(event) => {
           if (max !== undefined && event.currentTarget.validity.rangeOverflow) {
-            event.currentTarget.setCustomValidity("The maximum number of spots is 25.");
+            event.currentTarget.setCustomValidity(maxSpotsMessage);
           }
         }}
-        className="h-11 border border-white/20 bg-transparent px-3 text-sm tracking-normal normal-case text-[#f4efe6] outline-none placeholder:text-white/30 focus:border-white"
+        className="h-11 border border-white/20 bg-transparent px-3 text-base tracking-normal normal-case text-[#f4efe6] outline-none placeholder:text-white/30 focus:border-white"
       />
     </label>
   );

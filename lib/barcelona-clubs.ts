@@ -10,6 +10,20 @@ export type ClubDay = {
   meetups: ClubMeetup[];
 };
 
+const JS_WEEKDAYS = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+] as const;
+
+export function localWeekdayName(now = new Date()): string {
+  return JS_WEEKDAYS[now.getDay()];
+}
+
 export const BARCELONA_CLUB_DAYS: ClubDay[] = [
   {
     day: "Monday",

@@ -1,16 +1,18 @@
 "use client";
 
 import { AnnouncementBar, SiteHeader } from "@/app/components/site-header";
+import { useT } from "@/app/components/i18n-provider";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { canJoinRun, paceFitMessage, spotsLeft } from "@/lib/matching";
-import { formatPace, formatPaceBand, formatWhen, mapsSearchUrl, whoLabel } from "@/lib/types";
+import { canJoinRun, paceFit, spotsLeft } from "@/lib/matching";
+import { formatPace, formatWhen, mapsSearchUrl, type WhoCanJoin } from "@/lib/types";
 import { useMutation, useQuery } from "convex/react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function RunDetailPage() {
+  const { t, locale } = useT();
   const params = useParams<{ id: string }>();
   const runId = params.id as Id<"runs">;
   const me = useQuery(api.users.me);
@@ -26,17 +28,17 @@ export default function RunDetailPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("created") === "1") {
-      setNotice("The run is on the board. See you at the pin.");
+      setNotice(t("createdNotice"));
       window.history.replaceState({}, "", window.location.pathname);
     }
-  }, []);
+  }, [t]);
 
   if (run === undefined) {
     return (
       <div className="min-h-svh bg-black text-[#f4efe6]">
         <AnnouncementBar />
         <SiteHeader />
-        <p className="px-8 py-20 text-sm text-white/60">Loading this run…</p>
+        <p className="px-8 py-20 text-sm text-white/60">{t("loadingRun")}</p>
       </div>
     );
   }
@@ -46,7 +48,7 @@ export default function RunDetailPage() {
       <div className="min-h-svh bg-black text-[#f4efe6]">
         <AnnouncementBar />
         <SiteHeader />
-        <p className="px-8 py-20 text-sm text-white/60">This run is not on the board.</p>
+        <p className="px-8 py-20 text-sm text-white/60">{t("runNotOnBoard")}</p>
       </div>
     );
   }
@@ -56,16 +58,42 @@ export default function RunDetailPage() {
   const gate = canJoinRun(listed, listed.joinedCount, listed.viewerJoined, me ?? null);
   const left = spotsLeft(listed.spots, listed.joinedCount);
   const maps = mapsSearchUrl(listed.placeName, listed.city);
-  const paceWarning =
-    me && !listed.viewerIsHost ? paceFitMessage(listed, me.easyPaceMinPerKm) : null;
+  const paceWarning = (() => {
+    if (!me || listed.viewerIsHost) {
+      return null;
+    }
+    const fit = paceFit(listed, me.easyPaceMinPerKm);
+    const band = `${formatPace(listed.paceMin)}–${formatPace(listed.paceMax)} /km`;
+    if (fit === "faster") {
+      return t("paceFaster", { pace: formatPace(me.easyPaceMinPerKm), band });
+    }
+    if (fit === "slower") {
+      return t("paceSlower", { pace: formatPace(me.easyPaceMinPerKm), band });
+    }
+    return null;
+  })();
+
+  function whoText(whoCanJoin: WhoCanJoin) {
+    if (whoCanJoin === "women") return t("whoWomen");
+    if (whoCanJoin === "men") return t("whoMen");
+    return t("whoOpen");
+  }
+
+  function joinBlockedMessage() {
+    if (!me) return t("signInToJoinShort");
+    if (listed.joinedCount >= listed.spots) return t("runFull");
+    if (listed.whoCanJoin === "women" && me.gender !== "woman") return t("womenOnlyGate");
+    if (listed.whoCanJoin === "men" && me.gender !== "man") return t("menOnlyGate");
+    return gate.reason ?? "";
+  }
 
   async function onJoin() {
     setError("");
     try {
       await joinRun({ runId, hideName });
-      setNotice("You're in. See you at the pin.");
+      setNotice(t("joinedNotice"));
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Could not join.");
+      setError(caught instanceof Error ? caught.message : t("couldNotJoin"));
     }
   }
 
@@ -74,12 +102,12 @@ export default function RunDetailPage() {
     try {
       await leaveRun({ runId });
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Could not leave.");
+      setError(caught instanceof Error ? caught.message : t("couldNotLeave"));
     }
   }
 
   async function onCancel() {
-    if (!window.confirm("Cancel this run? It comes off the board. People who joined will no longer see it.")) {
+    if (!window.confirm(t("cancelConfirm"))) {
       return;
     }
     setError("");
@@ -87,7 +115,7 @@ export default function RunDetailPage() {
       await cancelRun({ runId });
       window.location.href = "/find";
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Could not cancel.");
+      setError(caught instanceof Error ? caught.message : t("couldNotCancel"));
     }
   }
 
@@ -95,7 +123,7 @@ export default function RunDetailPage() {
     setShareNote("");
     const url = window.location.href;
     const title = `${listed.placeName} · TimesRun Club`;
-    const text = `${formatWhen(listed.startsAt)} · ${listed.distanceKm} km · ${formatPaceBand(listed.paceMin, listed.paceMax)}`;
+    const text = `${formatWhen(listed.startsAt, locale)} · ${listed.distanceKm} km · ${t("paceBand", { min: formatPace(listed.paceMin), max: formatPace(listed.paceMax) })}`;
     try {
       if (typeof navigator.share === "function") {
         await navigator.share({ title, text, url });
@@ -107,9 +135,9 @@ export default function RunDetailPage() {
       }
     }
     if (await copyText(url)) {
-      setShareNote("Link copied");
+      setShareNote(t("linkCopied"));
     } else {
-      setShareNote("Could not copy the link");
+      setShareNote(t("couldNotCopy"));
     }
   }
 
@@ -119,7 +147,7 @@ export default function RunDetailPage() {
       <div className="relative h-[46vh] min-h-[300px] overflow-hidden">
         <img
           src="/heroes/timesrun-hero-1.png"
-          alt="Runner on a desert trail at golden hour"
+            alt={t("altDesert")}
           className="absolute inset-0 h-full w-full object-cover object-[center_35%] saturate-[0.82] contrast-[1.06] sepia-[0.18]"
         />
         <div className="absolute inset-0 bg-black/40" />
@@ -135,33 +163,33 @@ export default function RunDetailPage() {
       <div className="mx-auto flex max-w-xl flex-col gap-8 px-5 py-12 md:px-8">
         <dl className="grid grid-cols-2 gap-6 text-[11px] tracking-[0.16em] uppercase">
           <div>
-            <dt className="text-white/45">When</dt>
-            <dd className="mt-1 text-sm tracking-normal normal-case">{formatWhen(listed.startsAt)}</dd>
+            <dt className="text-white/45">{t("when")}</dt>
+            <dd className="mt-1 text-sm tracking-normal normal-case">{formatWhen(listed.startsAt, locale)}</dd>
           </div>
           <div>
-            <dt className="text-white/45">Distance</dt>
+            <dt className="text-white/45">{t("distance")}</dt>
             <dd className="mt-1 text-sm tracking-normal normal-case">{listed.distanceKm} km</dd>
           </div>
           <div>
-            <dt className="text-white/45">Pace</dt>
+            <dt className="text-white/45">{t("pace")}</dt>
             <dd className="mt-1 text-sm tracking-normal normal-case">
-              {formatPace(listed.paceMin)} to {formatPace(listed.paceMax)} /km
+              {t("paceRange", { min: formatPace(listed.paceMin), max: formatPace(listed.paceMax) })}
             </dd>
           </div>
           <div>
-            <dt className="text-white/45">Who</dt>
-            <dd className="mt-1 text-sm tracking-normal normal-case">{whoLabel(listed.whoCanJoin)}</dd>
+            <dt className="text-white/45">{t("who")}</dt>
+            <dd className="mt-1 text-sm tracking-normal normal-case">{whoText(listed.whoCanJoin)}</dd>
           </div>
           {listed.meetupNote ? (
             <div className="col-span-2">
-              <dt className="text-white/45">Meet at</dt>
+              <dt className="text-white/45">{t("meetAt")}</dt>
               <dd className="mt-1 text-sm tracking-normal normal-case">{listed.meetupNote}</dd>
             </div>
           ) : null}
         </dl>
         {listed.whoCanJoin !== "open" ? (
           <p className="-mt-4 text-[11px] tracking-normal normal-case text-white/55">
-            Based on the gender members choose on their profile. We do not verify it.
+            {t("genderUnverified")}
           </p>
         ) : null}
 
@@ -176,13 +204,16 @@ export default function RunDetailPage() {
         ) : null}
 
         <p className="text-sm text-white/70">
-          {left} {left === 1 ? "spot" : "spots"} left · {run.joinedCount} going. Meet at the public pin — not a
-          private address.
+          {t("spotsLeftLine", {
+            left,
+            spotsWord: left === 1 ? t("spotWord") : t("spotsWord"),
+            going: run.joinedCount,
+          })}
         </p>
 
         {listed.attendeeNames ? (
           <div className="flex flex-col gap-2">
-            <p className="text-[11px] tracking-[0.18em] uppercase text-white/45">Going</p>
+            <p className="text-[11px] tracking-[0.18em] uppercase text-white/45">{t("goingHeading")}</p>
             <ul className="flex flex-col gap-1 text-sm text-white/70">
               {listed.attendeeNames.map((name, index) => (
                 <li key={`${name}-${index}`}>{name}</li>
@@ -190,19 +221,28 @@ export default function RunDetailPage() {
             </ul>
           </div>
         ) : listed.whoCanJoin !== "open" && me && !listed.viewerJoined ? (
-          <p className="text-sm text-white/55">Join to see who is going.</p>
+          <p className="text-sm text-white/55">{t("joinToSeeWho")}</p>
         ) : null}
 
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-          <a href={maps} target="_blank" rel="noreferrer" className="text-[11px] tracking-[0.2em] uppercase underline">
-            Open map
+          <a
+            href={maps}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 text-[11px] tracking-[0.2em] uppercase"
+          >
+            <span aria-hidden className="text-base leading-none">
+              📍
+            </span>
+            <span className="underline">{t("openMap")}</span>
           </a>
           <button
             type="button"
             onClick={() => void onShare()}
-            className="text-[11px] tracking-[0.2em] uppercase underline"
+            className="inline-flex items-center gap-1.5 text-[11px] tracking-[0.2em] uppercase"
           >
-            Share
+            <ShareMark />
+            <span className="underline">{t("share")}</span>
           </button>
           {shareNote ? <span className="text-[11px] tracking-[0.16em] uppercase text-white/55">{shareNote}</span> : null}
         </div>
@@ -211,19 +251,19 @@ export default function RunDetailPage() {
 
         {listed.viewerIsHost ? (
           <div className="flex flex-col gap-4">
-            <p className="text-sm text-white/70">You're hosting this run.</p>
+            <p className="text-sm text-white/70">{t("hostingThis")}</p>
             <Link
               href={`/runs/${listed._id}/edit`}
               className="inline-flex h-11 items-center justify-center rounded-full border border-white text-[11px] tracking-[0.28em] uppercase hover:bg-white hover:text-black"
             >
-              Edit run
+              {t("editRun")}
             </Link>
             <button
               type="button"
               onClick={() => void onCancel()}
               className="text-[11px] tracking-[0.2em] uppercase underline"
             >
-              Cancel run
+              {t("cancelRun")}
             </button>
           </div>
         ) : listed.viewerJoined ? (
@@ -232,10 +272,10 @@ export default function RunDetailPage() {
             onClick={() => void onLeave()}
             className="inline-flex h-11 items-center justify-center rounded-full border border-white text-[11px] tracking-[0.28em] uppercase hover:bg-white hover:text-black"
           >
-            Leave run
+            {t("leaveRun")}
           </button>
         ) : alreadyStarted ? (
-          <p className="text-sm text-white/70">This run has already started.</p>
+          <p className="text-sm text-white/70">{t("alreadyStarted")}</p>
         ) : gate.ok ? (
           <div className="flex flex-col gap-4">
             <label className="flex items-start gap-3 text-sm text-white/70">
@@ -245,14 +285,14 @@ export default function RunDetailPage() {
                 onChange={(event) => setHideName(event.target.checked)}
                 className="mt-1"
               />
-              Join without showing my name
+              {t("joinWithoutName")}
             </label>
             <button
               type="button"
               onClick={() => void onJoin()}
               className="inline-flex h-11 items-center justify-center rounded-full border border-white text-[11px] tracking-[0.28em] uppercase hover:bg-white hover:text-black"
             >
-              {paceWarning ? "Join anyway" : "Join"}
+              {paceWarning ? t("joinAnyway") : t("join")}
             </button>
           </div>
         ) : !me ? (
@@ -260,18 +300,29 @@ export default function RunDetailPage() {
             href={`/sign-in?next=${encodeURIComponent(`/runs/${listed._id}`)}`}
             className="inline-flex h-11 items-center justify-center rounded-full border border-white text-[11px] tracking-[0.28em] uppercase hover:bg-white hover:text-black"
           >
-            Sign in to join
+            {t("signInToJoin")}
           </Link>
         ) : (
           <div className="flex flex-col gap-3">
-            <p className="text-sm text-white/70">{gate.reason}</p>
+            <p className="text-sm text-white/70">{joinBlockedMessage()}</p>
             <Link href="/you" className="text-[11px] tracking-[0.2em] uppercase underline">
-              Update your profile
+              {t("updateProfile")}
             </Link>
           </div>
         )}
       </div>
     </div>
+  );
+}
+
+function ShareMark() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="18" cy="5" r="3" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="6" cy="12" r="3" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="18" cy="19" r="3" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M8.7 10.7 15.3 6.3M8.7 13.3 15.3 17.7" stroke="currentColor" strokeWidth="1.8" />
+    </svg>
   );
 }
 

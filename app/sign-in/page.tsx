@@ -1,7 +1,9 @@
 "use client";
 
 import { AnnouncementBar, SiteHeader } from "@/app/components/site-header";
+import { useT } from "@/app/components/i18n-provider";
 import { SiteFooter } from "@/app/components/site-footer";
+import type { MessageKey } from "@/lib/i18n";
 import Link from "next/link";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useConvex, useConvexAuth } from "convex/react";
@@ -13,13 +15,19 @@ type Mode = "signIn" | "signUp" | "forgot" | "resetCode";
 
 export default function SignInPage() {
   return (
-    <Suspense fallback={<SignInShell>Loading…</SignInShell>}>
+    <Suspense fallback={<SignInFallback />}>
       <SignInForm />
     </Suspense>
   );
 }
 
+function SignInFallback() {
+  const { t } = useT();
+  return <SignInShell>{t("loading")}</SignInShell>;
+}
+
 function SignInForm() {
+  const { t } = useT();
   const { signIn } = useAuthActions();
   const { isAuthenticated } = useConvexAuth();
   const convex = useConvex();
@@ -51,18 +59,27 @@ function SignInForm() {
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
-    setPending(true);
     const formData = new FormData(event.currentTarget);
+    if (mode === "signUp" || mode === "resetCode") {
+      const password = String(
+        formData.get(mode === "resetCode" ? "newPassword" : "password") ?? "",
+      );
+      if (password.length < 8 || password.length > 20) {
+        setError(t("passwordLength"));
+        return;
+      }
+    }
+    setPending(true);
     if (mode === "signUp") {
       const name = String(formData.get("name") ?? "").trim();
       if (name.length < 2 || name.length > 30) {
-        setError("Name must be 2 to 30 characters.");
+        setError(t("nameLength"));
         setPending(false);
         return;
       }
       const taken = await convex.query(api.users.isNameTaken, { name });
       if (taken) {
-        setError("That name is already taken.");
+        setError(t("nameTaken"));
         setPending(false);
         return;
       }
@@ -97,7 +114,7 @@ function SignInForm() {
         setMode("resetCode");
         return;
       }
-      setError(messageFor(mode, caught));
+      setError(messageFor(mode, caught, t));
     } finally {
       setPending(false);
     }
@@ -111,9 +128,9 @@ function SignInForm() {
           role="status"
           className="mt-4 max-w-xl font-[family-name:var(--font-display)] text-5xl font-extrabold tracking-[-0.04em] md:text-7xl"
         >
-          You're in.
+          {t("welcomeIn")}
           <br />
-          Find your Pack!
+          {t("welcomePack")}
         </h1>
       </div>
     );
@@ -121,65 +138,75 @@ function SignInForm() {
 
   return (
     <SignInShell>
-      <p className="text-[11px] tracking-[0.28em] uppercase">Account</p>
+      <p className="text-[11px] tracking-[0.28em] uppercase">{t("account")}</p>
       <h1 className="mt-2 font-[family-name:var(--font-display)] text-5xl font-extrabold tracking-[-0.04em]">
-        {heading(mode)}
+        {heading(mode, t)}
       </h1>
-      <p className="mt-4 max-w-md text-sm text-white/65">{copy(mode, resetEmail)}</p>
+      <p className="mt-4 max-w-md text-sm text-white/65">{copy(mode, resetEmail, t)}</p>
       <form key={mode} className="mt-10 flex flex-col gap-5" onSubmit={onSubmit}>
         {mode === "signUp" ? (
           <label className="flex flex-col gap-2 text-[11px] tracking-[0.18em] uppercase">
-            Name
+            {t("name")}
             <input
               name="name"
               type="text"
-              placeholder="Your name"
+              placeholder={t("placeholderName")}
               required
               minLength={2}
               maxLength={30}
               autoComplete="name"
-              className="h-11 border border-white/20 bg-transparent px-3 text-sm tracking-normal normal-case text-[#f4efe6] outline-none placeholder:text-white/30 focus:border-white"
+              className="h-11 border border-white/20 bg-transparent px-3 text-base tracking-normal normal-case text-[#f4efe6] outline-none placeholder:text-white/30 focus:border-white"
             />
             <span className="text-[11px] tracking-normal normal-case text-white/55">
-              This name is shown to other members of runs you join.
+              {t("nameShownJoin")}
             </span>
           </label>
         ) : null}
         {mode === "signIn" || mode === "signUp" || mode === "forgot" ? (
           <Field
-            label="Email"
+            label={t("labelEmail")}
             name="email"
             type="email"
             placeholder="you@email.com"
             autoComplete="email"
             defaultValue={resetEmail}
+            hidePasswordLabel={t("hidePassword")}
+            showPasswordLabel={t("showPassword")}
           />
         ) : null}
         {mode === "signIn" || mode === "signUp" ? (
           <Field
-            label="Password"
+            label={t("labelPassword")}
             name="password"
             type="password"
-            placeholder="At least 8 characters"
+            placeholder={t("placeholderPassword")}
             autoComplete={mode === "signUp" ? "new-password" : "current-password"}
+            hidePasswordLabel={t("hidePassword")}
+            showPasswordLabel={t("showPassword")}
+            hint={mode === "signUp" ? t("passwordHint") : undefined}
           />
         ) : null}
         {mode === "resetCode" ? (
           <>
             <Field
-              label="Code"
+              label={t("labelCode")}
               name="code"
               type="text"
-              placeholder="8-digit code"
+              placeholder={t("placeholderCode")}
               autoComplete="one-time-code"
               inputMode="numeric"
+              hidePasswordLabel={t("hidePassword")}
+              showPasswordLabel={t("showPassword")}
             />
             <Field
-              label="New password"
+              label={t("labelNewPassword")}
               name="newPassword"
               type="password"
-              placeholder="At least 8 characters"
+              placeholder={t("placeholderPassword")}
               autoComplete="new-password"
+              hidePasswordLabel={t("hidePassword")}
+              showPasswordLabel={t("showPassword")}
+              hint={t("passwordHint")}
             />
           </>
         ) : null}
@@ -189,7 +216,7 @@ function SignInForm() {
           disabled={pending}
           className="mt-2 inline-flex h-11 items-center justify-center rounded-full border border-white text-[11px] tracking-[0.28em] uppercase hover:bg-white hover:text-black disabled:opacity-50"
         >
-          {pending ? "Working…" : submitLabel(mode)}
+          {pending ? t("working") : submitLabel(mode, t)}
         </button>
       </form>
       {mode === "signIn" ? (
@@ -201,7 +228,7 @@ function SignInForm() {
             setMode("forgot");
           }}
         >
-          Forgot password?
+          {t("forgotPassword")}
         </button>
       ) : null}
       <button
@@ -219,53 +246,52 @@ function SignInForm() {
         }}
       >
         {mode === "signIn"
-          ? "Need an account? Create one"
+          ? t("needAccount")
           : mode === "signUp"
-            ? "Already have an account? Sign in"
-            : "Back to sign in"}
+            ? t("haveAccount")
+            : t("backToSignIn")}
       </button>
       {mode === "signUp" ? (
         <p className="mt-8 text-[11px] tracking-normal normal-case text-white/55">
-          By creating an account you agree we store the details described in{" "}
-          <Link href="/privacy" className="underline">
-            Privacy
-          </Link>
-          .
+          {t("agreePrivacyPrefix")}
+          <Link href="/privacy" className="underline">{t("privacy")}</Link>{t("agreePrivacySuffix")}
         </p>
       ) : (
         <Link
           href="/privacy"
           className="mt-8 block text-[11px] tracking-[0.18em] uppercase text-white/55 underline"
         >
-          Privacy
+          {t("privacy")}
         </Link>
       )}
     </SignInShell>
   );
 }
 
-function heading(mode: Mode) {
-  if (mode === "signUp") return "Create account";
-  if (mode === "forgot") return "Forgot password";
-  if (mode === "resetCode") return "Set a new password";
-  return "Sign in";
+type Translate = (key: MessageKey, vars?: Record<string, string | number>) => string;
+
+function heading(mode: Mode, t: Translate) {
+  if (mode === "signUp") return t("headingSignUp");
+  if (mode === "forgot") return t("headingForgot");
+  if (mode === "resetCode") return t("headingReset");
+  return t("headingSignIn");
 }
 
-function copy(mode: Mode, email: string) {
+function copy(mode: Mode, email: string, t: Translate) {
   if (mode === "forgot") {
-    return "We’ll email an 8-digit code if this address has an account.";
+    return t("copyForgot");
   }
   if (mode === "resetCode") {
-    return `Enter the code sent to ${email}, then choose a new password.`;
+    return t("copyReset", { email });
   }
-  return "Same board for everyone. Sign in to create a run, join, or set your pace.";
+  return t("copySignIn");
 }
 
-function submitLabel(mode: Mode) {
-  if (mode === "signUp") return "Create account";
-  if (mode === "forgot") return "Send code";
-  if (mode === "resetCode") return "Update password";
-  return "Sign in";
+function submitLabel(mode: Mode, t: Translate) {
+  if (mode === "signUp") return t("headingSignUp");
+  if (mode === "forgot") return t("sendCode");
+  if (mode === "resetCode") return t("updatePassword");
+  return t("headingSignIn");
 }
 
 function safeNextPath(value: string | null) {
@@ -282,19 +308,25 @@ function rawAuthMessage(caught: unknown) {
   return typeof caught === "string" ? caught : "";
 }
 
-function messageFor(mode: Mode, caught: unknown) {
+function messageFor(mode: Mode, caught: unknown, t: Translate) {
   const message = rawAuthMessage(caught);
   if (message.includes("AuthProviderDiscoveryFailed")) {
-    return "Sign-in is temporarily unavailable. Try again in a few minutes.";
+    return t("authUnavailable");
   }
   if (mode === "forgot" && (message.includes("Could not send") || message.includes("not configured"))) {
-    return "Could not send the reset email yet. Create a new account, or try again later.";
+    return t("resetEmailFail");
   }
   if (mode === "resetCode" && message.includes("Invalid code")) {
-    return "That code is wrong or expired. Request a new one.";
+    return t("codeWrong");
   }
   if (mode === "signUp" && message.includes("already taken")) {
-    return "That name is already taken.";
+    return t("nameTaken");
+  }
+  if (
+    (mode === "signUp" || mode === "resetCode") &&
+    (message.toLowerCase().includes("password") || message.includes("TooShort") || message.includes("TooLong"))
+  ) {
+    return t("passwordLength");
   }
   if (
     (mode === "signIn" || mode === "signUp") &&
@@ -302,9 +334,9 @@ function messageFor(mode: Mode, caught: unknown) {
       message.includes("InvalidAccountId") ||
       message.includes("Server Error"))
   ) {
-    return "Wrong email or password. If this is your first time on the live site, create an account.";
+    return t("wrongEmailPassword");
   }
-  return "Sign-in is temporarily unavailable. Try again in a few minutes.";
+  return t("authUnavailable");
 }
 
 function SignInShell({ children }: { children: React.ReactNode }) {
@@ -326,6 +358,9 @@ function Field({
   autoComplete,
   defaultValue,
   inputMode,
+  hidePasswordLabel,
+  showPasswordLabel,
+  hint,
 }: {
   label: string;
   name: string;
@@ -334,6 +369,9 @@ function Field({
   autoComplete: string;
   defaultValue?: string;
   inputMode?: "numeric";
+  hidePasswordLabel: string;
+  showPasswordLabel: string;
+  hint?: string;
 }) {
   const [visible, setVisible] = useState(false);
   const isPassword = type === "password";
@@ -350,7 +388,7 @@ function Field({
           autoComplete={autoComplete}
           defaultValue={defaultValue}
           inputMode={inputMode}
-          className={`h-11 w-full border border-white/20 bg-transparent px-3 text-sm tracking-normal normal-case text-[#f4efe6] outline-none placeholder:text-white/30 focus:border-white ${
+          className={`h-11 w-full border border-white/20 bg-transparent px-3 text-base tracking-normal normal-case text-[#f4efe6] outline-none placeholder:text-white/30 focus:border-white ${
             isPassword ? "pr-11" : ""
           }`}
         />
@@ -358,7 +396,7 @@ function Field({
           <button
             type="button"
             onClick={() => setVisible((open) => !open)}
-            aria-label={visible ? "Hide password" : "Show password"}
+            aria-label={visible ? hidePasswordLabel : showPasswordLabel}
             aria-pressed={visible}
             className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-white/70 hover:text-white"
           >
@@ -366,6 +404,9 @@ function Field({
           </button>
         ) : null}
       </div>
+      {hint ? (
+        <span className="text-[11px] tracking-normal normal-case text-white/55">{hint}</span>
+      ) : null}
     </label>
   );
 }

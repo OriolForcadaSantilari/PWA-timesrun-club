@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { query } from "./_generated/server";
 import { getCurrentUserOrNull } from "./lib/auth";
 import { authedMutation } from "./lib/customFunctions";
@@ -89,12 +89,10 @@ export const updateMe = authedMutation({
     if (genderChanged && ctx.user.genderChangedAt !== undefined) {
       const nextAllowed = ctx.user.genderChangedAt + GENDER_COOLDOWN_MS;
       if (Date.now() < nextAllowed) {
-        const when = new Date(nextAllowed).toLocaleDateString("en-GB", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
+        throw new ConvexError({
+          code: "GENDER_COOLDOWN",
+          nextAllowed,
         });
-        throw new Error(`Gender can be changed every 30 days. Next change on ${when}.`);
       }
     }
 
