@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "./i18n-provider";
 import { useEffect, useState } from "react";
 
 const DISMISS_KEY = "timesrun-pwa-install-dismissed";
@@ -23,11 +24,17 @@ function isIosSafari(): boolean {
 }
 
 export function PwaInstall() {
+  const { t } = useT();
   const [showIosHint, setShowIosHint] = useState(false);
   const [installEvent, setInstallEvent] = useState<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
+      void navigator.serviceWorker.getRegistrations().then((registrations) => {
+        for (const registration of registrations) {
+          void registration.update();
+        }
+      });
       void navigator.serviceWorker.register("/sw.js", { updateViaCache: "none" });
     }
 
@@ -74,12 +81,12 @@ export function PwaInstall() {
       <div className="mx-auto flex max-w-lg items-start justify-between gap-3">
         <p className="text-[11px] leading-relaxed tracking-[0.04em]">
           {installEvent ? (
-            <>Add TimesRun Club to your home screen — opens on Find, like an app.</>
+            t("pwaAndroid")
           ) : (
             <>
-              On iPhone: tap Share
+              {t("pwaIosPrefix")}
               <span aria-hidden> ⎋ </span>
-              then <span className="uppercase tracking-[0.14em]">Add to Home Screen</span>.
+              <span className="uppercase tracking-[0.14em]">{t("pwaIosSuffix")}</span>
             </>
           )}
         </p>
@@ -90,16 +97,16 @@ export function PwaInstall() {
               onClick={() => void install()}
               className="border border-[#d8b878] px-3 py-1.5 text-[10px] font-medium tracking-[0.18em] text-[#d8b878] uppercase"
             >
-              Install
+              {t("install")}
             </button>
           ) : null}
           <button
             type="button"
             onClick={dismiss}
-            aria-label="Dismiss install hint"
+            aria-label={t("dismissInstall")}
             className="px-2 py-1.5 text-[10px] tracking-[0.16em] text-white/50 uppercase"
           >
-            Close
+            {t("close")}
           </button>
         </div>
       </div>

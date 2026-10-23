@@ -40,6 +40,7 @@ export default defineSchema({
     spots: v.number(),
     whoCanJoin,
     placeName: v.string(),
+    meetupNote: v.optional(v.string()),
     city: v.string(),
     lat: v.number(),
     lng: v.number(),
@@ -58,4 +59,16 @@ export default defineSchema({
     .index("by_run", ["runId"])
     .index("by_user", ["userId"])
     .index("by_run_and_user", ["runId", "userId"]),
+
+  // Dashboard label: Feedback Box (Convex table names cannot contain spaces).
+  feedbackBox: defineTable({
+    userId: v.id("users"),
+    message: v.string(),
+    createdAt: v.number(),
+    path: v.optional(v.string()),
+    email: v.optional(v.string()),
+    name: v.optional(v.string()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_createdAt", ["createdAt"]),
 });

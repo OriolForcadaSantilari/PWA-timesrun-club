@@ -1,35 +1,36 @@
 "use client";
 
 import { useAuthActions } from "@convex-dev/auth/react";
-import { Authenticated, Unauthenticated, AuthLoading } from "convex/react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useConvexAuth } from "convex/react";
+import { useT } from "./i18n-provider";
 
 export function AuthButtons() {
   const { signOut } = useAuthActions();
-  const router = useRouter();
+  const { isAuthenticated } = useConvexAuth();
+  const { t } = useT();
+
+  if (isAuthenticated) {
+    return (
+      <button
+        type="button"
+        className="text-[11px] tracking-[0.18em] uppercase"
+        onClick={() => {
+          void signOut().then(() => {
+            window.location.assign("/find");
+          });
+        }}
+      >
+        {t("signOut")}
+      </button>
+    );
+  }
 
   return (
-    <>
-      <AuthLoading>
-        <span className="text-[11px] tracking-[0.18em] uppercase opacity-50">…</span>
-      </AuthLoading>
-      <Unauthenticated>
-        <Link href="/sign-in" className="text-[11px] tracking-[0.18em] uppercase">
-          Sign in
-        </Link>
-      </Unauthenticated>
-      <Authenticated>
-        <button
-          type="button"
-          className="text-[11px] tracking-[0.18em] uppercase"
-          onClick={() => {
-            void signOut().then(() => router.refresh());
-          }}
-        >
-          Sign out
-        </button>
-      </Authenticated>
-    </>
+    <a
+      href="/sign-in"
+      className="text-[11px] tracking-[0.18em] uppercase"
+    >
+      {t("signIn")}
+    </a>
   );
 }

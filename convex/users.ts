@@ -1,8 +1,13 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { query } from "./_generated/server";
 import { getCurrentUserOrNull } from "./lib/auth";
 import { authedMutation } from "./lib/customFunctions";
-import { assertPublicName, FALLBACK_NAME, storedPublicName } from "./lib/names";
+import {
+  assertNameAvailable,
+  assertPublicName,
+  FALLBACK_NAME,
+  storedPublicName,
+} from "./lib/names";
 
 const GENDER_COOLDOWN_MS = 30 * 24 * 60 * 60 * 1000;
 
@@ -23,6 +28,19 @@ const meValidator = v.union(
   }),
   v.null(),
 );
+
+export const isNameTaken = query({
+  args: { name: v.string() },
+  returns: v.boolean(),
+  handler: async (ctx, args) => {
+    const wanted = args.name.trim().toLowerCase();
+    if (wanted.length < 2) {
+      return false;
+    }
+    const users = await ctx.db.query("users").collect();
+    return users.some((user) => storedPublicName(user.name)?.toLowerCase() === wanted);
+  },
+});
 
 export const me = query({
   args: {},
@@ -63,6 +81,7 @@ export const updateMe = authedMutation({
         throw new Error("Name is required");
       }
       nextName = assertPublicName(args.name);
+      await assertNameAvailable(ctx, nextName, ctx.user._id);
     }
 
     const currentGender = ctx.user.gender;
@@ -70,12 +89,10 @@ export const updateMe = authedMutation({
     if (genderChanged && ctx.user.genderChangedAt !== undefined) {
       const nextAllowed = ctx.user.genderChangedAt + GENDER_COOLDOWN_MS;
       if (Date.now() < nextAllowed) {
-        const when = new Date(nextAllowed).toLocaleDateString("en-GB", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
+        throw new ConvexError({
+          code: "GENDER_COOLDOWN",
+          nextAllowed,
         });
-        throw new Error(`Gender can be changed every 30 days. Next change on ${when}.`);
       }
     }
 

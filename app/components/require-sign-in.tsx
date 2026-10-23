@@ -1,27 +1,48 @@
 "use client";
 
 import { useConvexAuth } from "convex/react";
-import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
+import { AnnouncementBar, SiteHeader } from "./site-header";
+
+const AUTH_WAIT_MS = 4000;
+
+function clearConvexAuthKeys() {
+  for (const key of Object.keys(localStorage)) {
+    if (key.startsWith("__convexAuth")) {
+      localStorage.removeItem(key);
+    }
+  }
+}
 
 export function RequireSignIn({ children }: { children: ReactNode }) {
   const { isAuthenticated, isLoading } = useConvexAuth();
-  const router = useRouter();
+  const pathname = usePathname();
+  const signInHref = `/sign-in?next=${encodeURIComponent(pathname)}`;
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      const next = window.location.pathname + window.location.search;
-      router.replace(`/sign-in?next=${encodeURIComponent(next)}`);
+    if (isAuthenticated) {
+      return;
     }
-  }, [isAuthenticated, isLoading, router]);
+    if (!isLoading) {
+      window.location.replace(signInHref);
+      return;
+    }
+    const timeoutId = window.setTimeout(() => {
+      clearConvexAuthKeys();
+      window.location.replace(signInHref);
+    }, AUTH_WAIT_MS);
+    return () => window.clearTimeout(timeoutId);
+  }, [isAuthenticated, isLoading, signInHref]);
 
-  if (isLoading || !isAuthenticated) {
-    return (
-      <p className="min-h-svh bg-black px-8 py-20 text-sm text-white/60">
-        {isLoading ? "Loading…" : "Redirecting to sign in…"}
-      </p>
-    );
+  if (isAuthenticated) {
+    return children;
   }
 
-  return children;
+  return (
+    <div className="min-h-svh bg-black text-[#f4efe6]">
+      <AnnouncementBar />
+      <SiteHeader />
+    </div>
+  );
 }

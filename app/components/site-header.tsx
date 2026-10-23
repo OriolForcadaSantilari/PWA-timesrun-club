@@ -1,60 +1,69 @@
-import Link from "next/link";
-import { AuthButtons } from "./auth-buttons";
+"use client";
 
-const NAV = [
-  { href: "/find", label: "FIND" },
-  { href: "/find/new", label: "CREATE" },
-  { href: "/clubs", label: "CLUBS" },
-] as const;
+import { useT } from "./i18n-provider";
+import { AuthButtons } from "./auth-buttons";
+import { ProtectedNavLink } from "./protected-nav-link";
+
+const navLinkClass =
+  "px-1 py-2 font-[family-name:var(--font-display)] text-[12px] font-bold tracking-[0.22em] uppercase drop-shadow-[0_1px_8px_rgba(0,0,0,0.4)] md:py-0 md:text-[12px] md:tracking-[0.18em]";
 
 type SiteHeaderProps = {
   overlay?: boolean;
 };
 
 export function SiteHeader({ overlay = false }: SiteHeaderProps) {
+  const { t } = useT();
   const tone = overlay ? "text-white" : "text-[#f4efe6]";
+  const nav = [
+    { href: "/find", label: t("navFind") },
+    { href: "/find/new", label: t("navCreate") },
+    { href: "/clubs", label: t("navClubs") },
+  ] as const;
 
   return (
     <header
-      className={`flex items-center justify-between px-5 py-4 md:px-8 ${
+      className={`grid grid-cols-2 items-center gap-x-3 px-5 py-3 md:flex md:justify-between md:px-8 md:py-4 ${
         overlay ? `absolute inset-x-0 top-0 z-20 ${tone}` : `relative bg-black ${tone}`
       }`}
     >
-      <Link
+      <a
         href="/"
         aria-label="TimesRun Club"
-        className="font-[family-name:var(--font-display)] leading-[0.88] font-extrabold uppercase drop-shadow-[0_1px_10px_rgba(0,0,0,0.45)]"
+        className="justify-self-start font-[family-name:var(--font-display)] leading-[0.88] font-extrabold uppercase drop-shadow-[0_1px_10px_rgba(0,0,0,0.45)]"
       >
         <span className="block text-[22px] tracking-[-0.04em] md:text-[26px]">TimesRun</span>
         <span className="mt-0.5 block text-[10px] tracking-[0.46em] md:text-[11px]">Club</span>
-      </Link>
+      </a>
 
-      <nav className="flex items-center gap-3 md:gap-7">
-        {NAV.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className="text-[10px] tracking-[0.16em] uppercase drop-shadow-[0_1px_8px_rgba(0,0,0,0.4)] md:text-[11px] md:tracking-[0.18em]"
-          >
-            {item.label}
-          </Link>
-        ))}
+      <nav className="col-span-2 mt-5 flex items-center justify-center gap-8 md:order-none md:col-span-1 md:mt-0 md:flex-1 md:justify-center md:gap-7">
+        {nav.map((item) =>
+          item.href === "/find/new" ? (
+            <ProtectedNavLink key={item.href} href={item.href} className={navLinkClass}>
+              {item.label}
+            </ProtectedNavLink>
+          ) : (
+            <a key={item.href} href={item.href} className={navLinkClass}>
+              {item.label}
+            </a>
+          ),
+        )}
       </nav>
 
-      <div className="flex items-center gap-4 drop-shadow-[0_1px_8px_rgba(0,0,0,0.4)]">
+      <div className="col-start-2 row-start-1 flex items-center justify-self-end gap-4 drop-shadow-[0_1px_8px_rgba(0,0,0,0.4)]">
         <AuthButtons />
-        <Link href="/you" aria-label="Your profile">
+        <ProtectedNavLink href="/you" aria-label={t("ariaProfile")}>
           <PersonIcon />
-        </Link>
+        </ProtectedNavLink>
       </div>
     </header>
   );
 }
 
 export function AnnouncementBar() {
+  const { t } = useT();
   return (
     <p className="bg-black px-4 py-1.5 text-center text-[10px] font-medium tracking-[0.22em] text-white uppercase">
-      Open runs at your pace. Meet at a public pin.
+      {t("announcement")}
     </p>
   );
 }
@@ -72,4 +81,3 @@ function PersonIcon() {
     </svg>
   );
 }
-

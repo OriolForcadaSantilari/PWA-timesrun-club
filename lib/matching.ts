@@ -1,4 +1,4 @@
-import type { Gender, WhoCanJoin } from "@/lib/types";
+import { formatPace, type Gender, type WhoCanJoin } from "@/lib/types";
 
 export type JoinProfile = {
   easyPaceMinPerKm: number;
@@ -33,11 +33,36 @@ export function canJoinRun(
   if (run.whoCanJoin === "men" && profile.gender !== "man") {
     return { ok: false, reason: "This run is men only." };
   }
-  const pace = profile.easyPaceMinPerKm;
-  if (pace < run.paceMin - 0.15 || pace > run.paceMax + 0.15) {
-    return { ok: false, reason: "Your easy pace is outside this band." };
-  }
   return { ok: true };
+}
+
+const PACE_SLACK = 0.15;
+
+export type PaceFit = "match" | "faster" | "slower";
+
+export function paceFit(run: Pick<JoinableRun, "paceMin" | "paceMax">, easyPaceMinPerKm: number): PaceFit {
+  if (easyPaceMinPerKm < run.paceMin - PACE_SLACK) {
+    return "faster";
+  }
+  if (easyPaceMinPerKm > run.paceMax + PACE_SLACK) {
+    return "slower";
+  }
+  return "match";
+}
+
+export function paceFitMessage(
+  run: Pick<JoinableRun, "paceMin" | "paceMax">,
+  easyPaceMinPerKm: number,
+): string | null {
+  const fit = paceFit(run, easyPaceMinPerKm);
+  const band = `${formatPace(run.paceMin)}–${formatPace(run.paceMax)} /km`;
+  if (fit === "faster") {
+    return `You're outside this run's pace — your easy pace (${formatPace(easyPaceMinPerKm)}) is faster than ${band}.`;
+  }
+  if (fit === "slower") {
+    return `You're outside this run's pace — your easy pace (${formatPace(easyPaceMinPerKm)}) is slower than ${band}.`;
+  }
+  return null;
 }
 
 export function spotsLeft(spots: number, joinedCount: number): number {

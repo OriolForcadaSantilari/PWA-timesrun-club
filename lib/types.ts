@@ -1,6 +1,15 @@
 export type WhoCanJoin = "open" | "women" | "men";
 export type Gender = "woman" | "man" | "unspecified";
 
+export const GENDER_COOLDOWN_MS = 30 * 24 * 60 * 60 * 1000;
+
+export function formatDayMonthYear(timestamp: number): string {
+  const date = new Date(timestamp);
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  return `${day}/${month}/${date.getFullYear()}`;
+}
+
 export type Profile = {
   id: string;
   name: string;
@@ -25,6 +34,16 @@ export function maskPaceInput(raw: string): string {
   return `${digits.slice(0, 2)}:${digits.slice(2)}`;
 }
 
+/** On blur: a bare minute like "5" becomes stopwatch "5:00". */
+export function completePaceInput(raw: string): string {
+  const masked = maskPaceInput(raw);
+  if (/^\d{1,2}$/.test(masked)) {
+    return `${Number(masked)}:00`;
+  }
+  const parsed = parsePace(masked);
+  return parsed != null ? formatPace(parsed) : masked;
+}
+
 export function parsePace(value: string): number | null {
   const masked = maskPaceInput(value);
   const match = /^(\d{1,2}):([0-5]\d)$/.exec(masked);
@@ -36,14 +55,55 @@ export function parsePace(value: string): number | null {
   return minutes + seconds / 60;
 }
 
-export function formatWhen(timestamp: number): string {
-  return new Intl.DateTimeFormat("en-GB", {
+export function formatPaceBand(minPerKm: number, maxPerKm: number): string {
+  return `Pace ${formatPace(minPerKm)}–${formatPace(maxPerKm)} /km`;
+}
+
+const ES_WEEKDAYS = [
+  "DOMINGO",
+  "LUNES",
+  "MARTES",
+  "MIÉRCOLES",
+  "JUEVES",
+  "VIERNES",
+  "SÁBADO",
+] as const;
+
+const ES_MONTHS = [
+  "ENERO",
+  "FEBRERO",
+  "MARZO",
+  "ABRIL",
+  "MAYO",
+  "JUNIO",
+  "JULIO",
+  "AGOSTO",
+  "SEPTIEMBRE",
+  "OCTUBRE",
+  "NOVIEMBRE",
+  "DICIEMBRE",
+] as const;
+
+export function formatWhen(timestamp: number, locale: "en" | "es" = "en"): string {
+  const date = new Date(timestamp);
+  const time = new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  })
+    .format(date)
+    .replace(/\s+/g, " ");
+  if (locale === "es") {
+    return `${ES_WEEKDAYS[date.getDay()]}, ${date.getDate()} ${ES_MONTHS[date.getMonth()]} ${time}`;
+  }
+  return new Intl.DateTimeFormat("en-US", {
     weekday: "short",
     day: "numeric",
     month: "short",
-    hour: "2-digit",
+    hour: "numeric",
     minute: "2-digit",
-  }).format(new Date(timestamp));
+    hour12: true,
+  }).format(date);
 }
 
 export function whoLabel(who: WhoCanJoin): string {
