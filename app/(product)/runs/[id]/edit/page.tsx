@@ -83,7 +83,7 @@ export default function EditRunPage() {
         lat,
         lng,
       });
-      router.push(`/runs/${runId}`);
+      router.push(`/run/${runId}`);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : t("couldNotSaveRun"));
       setPending(false);

@@ -113,7 +113,7 @@ export default function NewRunPage() {
         lat: coords.lat,
         lng: coords.lng,
       });
-      router.push(`/runs/${id}?created=1`);
+      router.push(`/run/${id}?created=1`);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : t("couldNotCreateRun"));
       setPending(false);

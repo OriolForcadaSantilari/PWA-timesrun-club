@@ -84,17 +84,40 @@ const ES_MONTHS = [
   "DICIEMBRE",
 ] as const;
 
+/** Every run is in Barcelona, so server and browser must agree on its wall-clock time. */
+export const RUN_TIME_ZONE = "Europe/Madrid";
+
+const EN_WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+function runDateParts(date: Date) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    weekday: "long",
+    day: "numeric",
+    month: "numeric",
+    timeZone: RUN_TIME_ZONE,
+  }).formatToParts(date);
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((entry) => entry.type === type)?.value ?? "";
+  return {
+    weekday: EN_WEEKDAYS.indexOf(part("weekday")),
+    day: Number(part("day")),
+    month: Number(part("month")) - 1,
+  };
+}
+
 export function formatWhen(timestamp: number, locale: "en" | "es" = "en"): string {
   const date = new Date(timestamp);
   const time = new Intl.DateTimeFormat("en-US", {
     hour: "numeric",
     minute: "2-digit",
     hour12: true,
+    timeZone: RUN_TIME_ZONE,
   })
     .format(date)
     .replace(/\s+/g, " ");
   if (locale === "es") {
-    return `${ES_WEEKDAYS[date.getDay()]}, ${date.getDate()} ${ES_MONTHS[date.getMonth()]} ${time}`;
+    const { weekday, day, month } = runDateParts(date);
+    return `${ES_WEEKDAYS[weekday]}, ${day} ${ES_MONTHS[month]} ${time}`;
   }
   return new Intl.DateTimeFormat("en-US", {
     weekday: "short",
@@ -103,7 +126,28 @@ export function formatWhen(timestamp: number, locale: "en" | "es" = "en"): strin
     hour: "numeric",
     minute: "2-digit",
     hour12: true,
-  }).format(date);
+    timeZone: RUN_TIME_ZONE,
+  })
+    .format(date)
+    .replace(/\s+/g, " ");
+}
+
+/** "Martes 27 oct 17:00", used in run page titles. */
+export function formatRunTitleDate(timestamp: number): string {
+  const formatted = new Intl.DateTimeFormat("es-ES", {
+    weekday: "long",
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+    timeZone: RUN_TIME_ZONE,
+  }).formatToParts(new Date(timestamp));
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    formatted.find((entry) => entry.type === type)?.value ?? "";
+  const weekday = part("weekday");
+  const month = part("month").replace(/\.$/, "");
+  return `${weekday.charAt(0).toUpperCase()}${weekday.slice(1)} ${part("day")} ${month} ${part("hour")}:${part("minute")}`;
 }
 
 export function whoLabel(who: WhoCanJoin): string {
