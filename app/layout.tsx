@@ -5,6 +5,7 @@ import Script from "next/script";
 import { I18nProvider } from "./components/i18n-provider";
 import { PwaInstall } from "./components/pwa-install";
 import { ConvexClientProvider } from "./ConvexClientProvider";
+import { baseOpenGraph } from "./shared-metadata";
 import { localeFromAcceptLanguage, type Locale } from "@/lib/i18n";
 import "./globals.css";
 
@@ -25,23 +26,7 @@ export const metadata: Metadata = {
   title: "TimesRun Club",
   description: "Find people at your pace. Join clubs. Fill open runs.",
   applicationName: "TimesRun Club",
-  openGraph: {
-    title: "TimesRun Club",
-    description: "Find people at your pace. Join clubs. Fill open runs.",
-    url: "https://www.timesrun.club",
-    siteName: "TimesRun Club",
-    type: "website",
-    locale: "en_US",
-    images: [
-      {
-        url: "https://www.timesrun.club/og.jpg?v=1",
-        width: 1200,
-        height: 630,
-        alt: "TimesRun Club",
-        type: "image/jpeg",
-      },
-    ],
-  },
+  openGraph: baseOpenGraph,
   twitter: {
     card: "summary_large_image",
     title: "TimesRun Club",

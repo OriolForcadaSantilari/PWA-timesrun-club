@@ -1,3 +1,4 @@
+import { baseOpenGraph } from "@/app/shared-metadata";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
@@ -7,6 +8,10 @@ export const metadata: Metadata = {
     "Los clubs de running de Barcelona día a día: hora, punto de encuentro e Instagram de cada uno.",
   alternates: {
     canonical: "/clubs",
+  },
+  openGraph: {
+    ...baseOpenGraph,
+    url: "https://www.timesrun.club/clubs",
   },
 };
 
