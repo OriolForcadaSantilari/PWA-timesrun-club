@@ -93,20 +93,20 @@ function PrivacyEs() {
   return (
     <section className="flex flex-col gap-3">
       <p className="text-sm leading-7 text-white/70">
-        TimesRun Club sirve para encontrar rodajes en grupo en puntos públicos de Barcelona.
+        TimesRun Club sirve para encontrar runs en grupo en puntos públicos de Barcelona.
         Guardamos la cuenta que creas: email, nombre, ritmo fácil y el género que eliges en tu
-        perfil. También guardamos los rodajes que abres (hora, distancia, rango de ritmo, quién
+        perfil. También guardamos los runs que abres (hora, distancia, rango de ritmo, quién
         puede unirse, nombre del punto y pin en el mapa) y a cuáles te unes.
       </p>
       <p className="text-sm leading-7 text-white/70">
-        Lo usamos para mostrar el tablero Find, encajar tu ritmo y aplicar rodajes solo mujeres
+        Lo usamos para mostrar el tablero de Buscar, encajar tu ritmo y aplicar runs solo mujeres
         o solo hombres según el género que hayas elegido. No verificamos identidad ni género.
       </p>
       <p className="text-sm leading-7 text-white/70">
         El nombre que das al crear la cuenta lo ven las personas con sesión iniciada en el
-        mismo rodaje. En Find se ve el recuento y hasta tres nombres. Quien no ha iniciado
+        mismo run. En Buscar se ve el recuento y hasta tres nombres. Quien no ha iniciado
         sesión solo ve recuentos, nunca nombres ni el email. Al unirte puedes elegir “Unirme
-        sin mostrar mi nombre”: ocupas plaza y apareces como “Anonymous runner”. En rodajes
+        sin mostrar mi nombre”: ocupas plaza y apareces como “Corredor anónimo”. En runs
         solo mujeres o solo hombres, la lista de nombres solo la ven quienes ya se han unido;
         el resto ve el recuento. El género solo se usa para esa elegibilidad. No aparece en un
         perfil público. Los pines son lugares públicos, no direcciones privadas.
@@ -116,8 +116,8 @@ function PrivacyEs() {
         página Clubs son enlaces públicos de Instagram.
       </p>
       <p className="text-sm leading-7 text-white/70">
-        Para borrar tu cuenta y tus datos, entra, ve a You y elige Eliminar mi cuenta. Eso
-        elimina tu perfil, tus apuntados y los rodajes que organizas. También puedes escribir a{" "}
+        Para borrar tu cuenta y tus datos, entra, ve a tu perfil y elige Eliminar mi cuenta. Eso
+        elimina tu perfil, tus apuntados y los runs que organizas. También puedes escribir a{" "}
         <a className="underline" href="mailto:hello@timesrun.club">
           hello@timesrun.club
         </a>

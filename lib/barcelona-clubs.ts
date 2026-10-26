@@ -3,6 +3,7 @@ export type ClubMeetup = {
   handle: string;
   time: string;
   place: string;
+  placeEs?: string;
 };
 
 export type ClubDay = {
@@ -85,6 +86,7 @@ export const BARCELONA_CLUB_DAYS: ClubDay[] = [
         handle: "midnightrunnersbarcelona",
         time: "20:00",
         place: "Location on Heylo",
+        placeEs: "Ubicación en Heylo",
       },
     ],
   },
@@ -118,7 +120,8 @@ export const BARCELONA_CLUB_DAYS: ClubDay[] = [
         name: "Stamina Running Barcelona",
         handle: "staminarunningbarcelona",
         time: "7:30",
-        place: "Tienda Stamina, Poblenou",
+        place: "Stamina store, Poblenou",
+        placeEs: "Tienda Stamina, Poblenou",
       },
     ],
   },
@@ -129,7 +132,8 @@ export const BARCELONA_CLUB_DAYS: ClubDay[] = [
         name: "Stamina Running Barcelona",
         handle: "staminarunningbarcelona",
         time: "9:00",
-        place: "Tienda Stamina, Poblenou",
+        place: "Stamina store, Poblenou",
+        placeEs: "Tienda Stamina, Poblenou",
       },
     ],
   },

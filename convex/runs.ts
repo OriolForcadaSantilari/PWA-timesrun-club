@@ -164,10 +164,14 @@ export const list = query({
 });
 
 export const get = query({
-  args: { runId: v.id("runs") },
+  args: { runId: v.string() },
   returns: v.union(runCardValidator, v.null()),
   handler: async (ctx, args) => {
-    const run = await ctx.db.get(args.runId);
+    const runId = ctx.db.normalizeId("runs", args.runId);
+    if (!runId) {
+      return null;
+    }
+    const run = await ctx.db.get(runId);
     if (!run) {
       return null;
     }

@@ -4,6 +4,7 @@ import { AnnouncementBar, SiteHeader } from "@/app/components/site-header";
 import { useT } from "@/app/components/i18n-provider";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
+import { ANONYMOUS_RUNNER } from "@/convex/lib/names";
 import { canJoinRun, paceFit, spotsLeft } from "@/lib/matching";
 import { formatPace, formatWhen, mapsSearchUrl, type WhoCanJoin } from "@/lib/types";
 import { useMutation, useQuery } from "convex/react";
@@ -216,7 +217,7 @@ export default function RunDetailPage() {
             <p className="text-[11px] tracking-[0.18em] uppercase text-white/45">{t("goingHeading")}</p>
             <ul className="flex flex-col gap-1 text-sm text-white/70">
               {listed.attendeeNames.map((name, index) => (
-                <li key={`${name}-${index}`}>{name}</li>
+                <li key={`${name}-${index}`}>{name === ANONYMOUS_RUNNER ? t("anonymousRunner") : name}</li>
               ))}
             </ul>
           </div>

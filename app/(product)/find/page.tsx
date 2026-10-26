@@ -3,19 +3,39 @@
 import { AnnouncementBar, SiteHeader } from "@/app/components/site-header";
 import { useT } from "@/app/components/i18n-provider";
 import { api } from "@/convex/_generated/api";
+import { ANONYMOUS_RUNNER } from "@/convex/lib/names";
 import { canJoinRun, spotsLeft } from "@/lib/matching";
 import { formatPace, formatWhen, type WhoCanJoin } from "@/lib/types";
 import type { MessageKey } from "@/lib/i18n";
 import { useQuery } from "convex/react";
 import { useEffect, useMemo, useState } from "react";
 
-const WHO_FILTERS: { id: "match" | WhoCanJoin | "all"; labelKey: MessageKey }[] = [
+type PaceFilterId = "pace-430-530" | "pace-530-630";
+
+const PACE_FILTERS: Record<PaceFilterId, { min: number; max: number }> = {
+  "pace-430-530": { min: 4.5, max: 5.5 },
+  "pace-530-630": { min: 5.5, max: 6.5 },
+};
+
+const WHO_FILTERS: ({ id: "match" | WhoCanJoin | "all"; labelKey: MessageKey } | { id: PaceFilterId; label: string })[] = [
   { id: "all", labelKey: "filterAll" },
   { id: "match", labelKey: "filterForYou" },
   { id: "open", labelKey: "filterOpen" },
   { id: "women", labelKey: "filterWomen" },
   { id: "men", labelKey: "filterMen" },
+  { id: "pace-430-530", label: "4:30-5:30" },
+  { id: "pace-530-630", label: "5:30-6:30" },
 ];
+
+function isPaceFilter(id: string): id is PaceFilterId {
+  return id in PACE_FILTERS;
+}
+
+function inPaceRange(run: { paceMin: number; paceMax: number }, range: { min: number; max: number }) {
+  const overlaps = run.paceMin < range.max && run.paceMax > range.min;
+  const inside = run.paceMin >= range.min && run.paceMax <= range.max;
+  return overlaps || inside;
+}
 
 export default function FindPage() {
   const { t, locale } = useT();
@@ -54,6 +74,10 @@ export default function FindPage() {
         return runs.filter((run) => run.whoCanJoin === "open");
       }
       return runs.filter((run) => canJoinRun(run, run.joinedCount, run.viewerJoined, me).ok);
+    }
+    if (isPaceFilter(who)) {
+      const range = PACE_FILTERS[who];
+      return runs.filter((run) => inPaceRange(run, range));
     }
     return runs.filter((run) => run.whoCanJoin === who);
   }, [runs, me, who]);
@@ -96,13 +120,13 @@ export default function FindPage() {
                 key={filter.id}
                 type="button"
                 onClick={() => setWho(filter.id)}
-                className={`h-8 rounded-full border px-3 text-[10px] tracking-[0.18em] uppercase ${
+                className={`h-8 rounded-full border px-3 text-[10px] tracking-[0.18em] whitespace-nowrap uppercase ${
                   who === filter.id
                     ? "border-[#f4efe6] bg-[#f4efe6] text-black"
                     : "border-white/25 text-[#f4efe6]"
                 }`}
               >
-                {t(filter.labelKey)}
+                {"labelKey" in filter ? t(filter.labelKey) : filter.label}
               </button>
             ))}
           </div>
@@ -143,9 +167,9 @@ export default function FindPage() {
               return (
                 <li key={run._id}>
                   <a href={`/runs/${run._id}`} className="block py-6 transition-opacity hover:opacity-80">
-                    <div className="flex items-baseline justify-between gap-4">
+                    <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
                       <p className="text-[11px] tracking-[0.18em] uppercase">{formatWhen(run.startsAt, locale)}</p>
-                      <p className="text-[11px] tracking-[0.18em] uppercase">
+                      <p className="text-[11px] tracking-[0.18em] whitespace-nowrap uppercase">
                         {run.distanceKm} km · {t("paceBand", { min: formatPace(run.paceMin), max: formatPace(run.paceMax) })}
                       </p>
                     </div>
@@ -159,7 +183,9 @@ export default function FindPage() {
                       <p className="mt-2 text-[11px] tracking-[0.12em] text-white/60 normal-case">
                         {t("goingList", {
                           count: run.joinedCount,
-                          names: run.attendeeNames.join(", "),
+                          names: run.attendeeNames
+                            .map((name) => (name === ANONYMOUS_RUNNER ? t("anonymousRunner") : name))
+                            .join(", "),
                         })}
                         {run.joinedCount > run.attendeeNames.length ? "…" : ""}
                       </p>

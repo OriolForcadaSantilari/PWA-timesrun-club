@@ -24,11 +24,6 @@ export default function ClubsPage() {
     if (!selectedTab) {
       return;
     }
-    selectedTab.scrollIntoView({
-      inline: "nearest",
-      block: "nearest",
-      behavior: "auto",
-    });
     if (moveFocusRef.current) {
       selectedTab.focus();
       moveFocusRef.current = false;
@@ -81,12 +76,11 @@ export default function ClubsPage() {
       <div className="mx-auto flex max-w-3xl flex-col gap-10 px-5 py-12 md:px-8">
         <p className="text-sm leading-7 text-white/70">{t("clubsIntro")}</p>
 
-        <div className="-mx-5 overflow-x-auto overscroll-x-contain px-5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:overflow-visible md:px-0">
-          <div
-            role="tablist"
-            aria-label={t("clubsWeekdays")}
-            className="flex w-max min-w-full gap-2 md:w-full md:justify-between"
-          >
+        <div
+          role="tablist"
+          aria-label={t("clubsWeekdays")}
+          className="grid grid-cols-7 gap-1.5 md:gap-2"
+        >
             {BARCELONA_CLUB_DAYS.map((day, index) => {
               const selected = day.day === selectedDay;
               return (
@@ -101,7 +95,7 @@ export default function ClubsPage() {
                   tabIndex={selected ? 0 : -1}
                   onClick={() => selectDay(day.day)}
                   onKeyDown={(event) => onTabKeyDown(event, index)}
-                  className={`inline-flex h-11 min-w-[3.4rem] shrink-0 items-center justify-center rounded-full border px-4 font-[family-name:var(--font-mono)] text-[11px] tracking-[0.18em] uppercase md:min-w-0 md:flex-1 ${
+                  className={`inline-flex h-11 min-w-0 items-center justify-center rounded-full border font-[family-name:var(--font-mono)] text-[11px] tracking-[0.08em] uppercase md:tracking-[0.18em] ${
                     selected
                       ? "border-[#f4efe6] bg-[#f4efe6] text-black"
                       : "border-white/25 text-[#f4efe6]"
@@ -111,7 +105,6 @@ export default function ClubsPage() {
                 </button>
               );
             })}
-          </div>
         </div>
 
         {selectedDay ? (
@@ -134,7 +127,7 @@ export default function ClubsPage() {
                       className="block py-6 transition-opacity hover:opacity-80"
                     >
                       <p className="text-[11px] tracking-[0.18em] uppercase text-white/60">
-                        {meetup.time} · {meetup.place}
+                        {meetup.time} · {locale === "es" && meetup.placeEs ? meetup.placeEs : meetup.place}
                       </p>
                       <p className="mt-2 font-[family-name:var(--font-display)] text-2xl font-semibold tracking-[-0.03em]">
                         {meetup.name}
@@ -156,7 +149,7 @@ export default function ClubsPage() {
 
         <Link
           href="/find"
-          className="inline-flex h-11 w-fit items-center rounded-full border border-white px-6 text-[11px] tracking-[0.28em] uppercase hover:bg-white hover:text-black"
+          className="mx-auto inline-flex h-11 w-fit items-center rounded-full border border-white px-6 text-[11px] tracking-[0.28em] uppercase hover:bg-white hover:text-black"
         >
           {t("findARun")}
         </Link>
