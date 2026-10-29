@@ -149,7 +149,7 @@ export function RunDetail({ runId: id, initialRun }: { runId: string; initialRun
       <AnnouncementBar />
       <div className="relative h-[46vh] min-h-[300px] overflow-hidden">
         <img
-          src="/heroes/timesrun-hero-1.png"
+          src="/heroes/timesrun-hero-1.jpg"
             alt={t("altDesert")}
           className="absolute inset-0 h-full w-full object-cover object-[center_35%] saturate-[0.82] contrast-[1.06] sepia-[0.18]"
         />

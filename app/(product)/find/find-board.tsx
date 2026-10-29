@@ -101,7 +101,7 @@ export function FindBoard({ initialRuns }: { initialRuns?: RunCards }) {
       <div className="relative">
         <div className="relative h-[42vh] min-h-[280px] overflow-hidden">
           <img
-            src="/heroes/timesrun-hero-1.png"
+            src="/heroes/timesrun-hero-1.jpg"
             alt={t("altDesert")}
             className="absolute inset-0 h-full w-full object-cover object-[center_40%] saturate-[0.82] contrast-[1.06] sepia-[0.18]"
           />

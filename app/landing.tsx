@@ -15,7 +15,8 @@ export function Landing() {
     () =>
       [
         {
-          src: "/heroes/timesrun-hero-1.png",
+          src: "/heroes/timesrun-hero-1.jpg",
+          position: "object-[center_top]",
           title: t("landingOpenRun"),
           kicker: t("landingFindYourPace"),
           cta: t("landingJoin"),
@@ -72,7 +73,7 @@ export function Landing() {
             key={item.src}
             src={item.src}
             alt={item.alt}
-            className={`absolute inset-0 h-full w-full object-cover object-[center_35%] saturate-[0.82] contrast-[1.06] sepia-[0.18] transition-opacity duration-700 ${
+            className={`absolute inset-0 h-full w-full object-cover ${"position" in item ? item.position : "object-[center_35%]"} saturate-[0.82] contrast-[1.06] sepia-[0.18] transition-opacity duration-700 ${
               i === index ? "opacity-100" : "opacity-0"
             }`}
           />
